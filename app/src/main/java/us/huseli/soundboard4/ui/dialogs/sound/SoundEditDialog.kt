@@ -38,9 +38,11 @@ import us.huseli.soundboard4.ui.utils.rememberWorkInProgressState
 
 @Composable
 fun SoundEditDialog(
+    selectedCategoryId: String? = null,
     viewModel: SoundEditViewModel = hiltViewModel(),
     wipState: WorkInProgressState = rememberWorkInProgressState(),
     onDismiss: () -> Unit = {},
+    onAddCategoryClick: () -> Unit = {},
 ) {
     val sounds by viewModel.sounds.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
@@ -56,23 +58,26 @@ fun SoundEditDialog(
                 onDismiss()
             }
         },
+        onAddCategoryClick = onAddCategoryClick,
+        selectedCategoryId = selectedCategoryId,
     )
 }
 
 @Composable
 private fun SoundEditDialogImpl(
-    sounds: List<Sound>,
-    categories: List<Category>,
+    sounds: List<Sound> = emptyList(),
+    categories: List<Category> = emptyList(),
+    selectedCategoryId: String? = null,
     onDismiss: () -> Unit = {},
     onConfirm: (SoundEditParams) -> Unit = {},
+    onAddCategoryClick: () -> Unit = {},
 ) {
     val singleSound = remember(sounds) { sounds.takeIf { it.size == 1 }?.first() }
     var name by rememberSaveable(singleSound) { mutableStateOf(singleSound?.name) }
     var volume by rememberSaveable(singleSound) { mutableFloatStateOf(singleSound?.volume ?: 1f) }
     var keepVolume by rememberSaveable(singleSound) { mutableStateOf(singleSound == null) }
     var resetPlayCount by rememberSaveable { mutableStateOf(false) }
-    var categoryId by rememberSaveable(singleSound) { mutableStateOf(singleSound?.categoryId) }
-    val category = remember(categoryId) { categories.find { it.id == categoryId } }
+    var categoryId by rememberSaveable(singleSound) { mutableStateOf(selectedCategoryId ?: singleSound?.categoryId) }
     val params = remember(name, volume, keepVolume, categoryId) {
         SoundEditParams(
             name = name,
@@ -120,10 +125,11 @@ private fun SoundEditDialogImpl(
                     Text(stringResource(R.string.category))
                     CategoryDropdownMenu(
                         categories = categories,
-                        initialValue = category,
+                        selectedCategoryId = categoryId,
                         onSelect = { categoryId = it?.id },
                         showEmptyItem = singleSound == null,
                         emptyItemText = stringResource(R.string.not_changed),
+                        onAddCategoryClick = onAddCategoryClick,
                     )
                 }
                 Row(

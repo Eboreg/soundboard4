@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="add_category">Add category</string>
     <string name="add_sound_s">Add sound(s)</string>
     <string name="app_name">Ljudbräda</string>
@@ -48,15 +48,16 @@
     <string name="sort_sounds_by">Sort sounds by</string>
     <string name="stop">Stop</string>
     <string name="volume">Volume</string>
-    <string name="working_ellipsis">Working …</string>
-    <string name="x_new_sounds_were_imported">%1$s new sounds were imported.</string>
-    <string name="x_of_y_selected">%1$d/%2$d selected</string>
-    <string name="x_sounds_selected">(%1$d sounds selected)</string>
+    <string name="x_of_y_selected" tools:ignore="PluralsCandidate">%1$d/%2$d selected</string>
+    <string name="x_sounds_selected" tools:ignore="PluralsCandidate">(%1$d sounds selected)</string>
     <string name="yes_please">Yes, please</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
     <string name="zoom_x_percent">Zoom: %1$d %%</string>
     <string name="stop_all_playback">Stop all playback</string>
+    <string name="saving_x">Saving %1$s</string>
+    <string name="importing_x">Importing %1$s</string>
+    <string name="converting_x">Converting %1$s</string>
     <plurals name="converted_x_files_to_wav">
         <item quantity="one">Converted one file to WAV.</item>
         <item quantity="other">Converted %1$d files to WAV.</item>

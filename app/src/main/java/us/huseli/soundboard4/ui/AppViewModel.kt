@@ -17,6 +17,7 @@ import us.huseli.soundboard4.domain.AutoSoundImportUseCase
 import us.huseli.soundboard4.domain.CleanCacheAndOrphansUseCase
 import us.huseli.soundboard4.domain.ManualSoundImportUseCase
 import us.huseli.soundboard4.player.SoundPlayerRepository
+import us.huseli.soundboard4.ui.utils.WorkInProgressState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,7 +45,8 @@ class AppViewModel @Inject constructor(
 
     fun deselectAllSounds() = soundRepository.deselectAllSounds()
 
-    suspend fun importSoundsFromUris(uris: List<Uri>): Boolean = manualSoundImportUseCase(uris)
+    suspend fun importSoundsFromUris(uris: List<Uri>, wipState: WorkInProgressState? = null): Boolean =
+        manualSoundImportUseCase(uris, wipState)
 
     fun selectAllSounds() {
         viewModelScope.launch {

@@ -24,6 +24,7 @@ fun <T> SimpleExposedDropdownMenu(
     values: Collection<T>,
     initialValue: T?,
     onSelect: (T?) -> Unit,
+    modifier: Modifier = Modifier,
     showEmptyItem: Boolean = false,
     item: @Composable (T?) -> Unit,
 ) {
@@ -33,6 +34,7 @@ fun <T> SimpleExposedDropdownMenu(
     ExposedDropdownMenuBox(
         expanded = isExpanded,
         onExpandedChange = { isExpanded = it },
+        modifier = modifier
     ) {
         DropdownMenuItem(
             text = { item(currentValue) },

@@ -18,6 +18,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +47,9 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
     wipState: WorkInProgressState = rememberWorkInProgressState(),
+    selectedCategoryId: String? = null,
     onDismiss: () -> Unit = {},
+    onAddCategoryClick: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -56,6 +59,9 @@ fun SettingsScreen(
             if (uri != null) viewModel.setAutoImportDirectory(uri)
         }
 
+    LaunchedEffect(selectedCategoryId) {
+        selectedCategoryId?.also(viewModel::setAutoImportCategoryId)
+    }
 
     SettingsScreenImpl(
         modifier = modifier,
@@ -69,21 +75,10 @@ fun SettingsScreen(
         onConvertToWavChange = viewModel::setConvertToWav,
         onConvertExistingFilesToWavClick = {
             scope.launch {
-                wipState.run(Dispatchers.IO) { viewModel.convertExistingFilesToWav(context) }
+                wipState.run(Dispatchers.IO) { viewModel.convertExistingFilesToWav(context, wipState) }
             }
-        }
-    )
-}
-
-@Composable
-fun ConvertToWavDialog(onDismiss: () -> Unit = {}, onConfirm: () -> Unit = {}) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.no_thank_you)) } },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.yes_please)) } },
-        title = { Text(stringResource(R.string.convert_sounds_to_wav)) },
-        text = { Text(stringResource(R.string.convert_all_existing_non_wav_files)) },
-        shape = MaterialTheme.shapes.small,
+        },
+        onAddCategoryClick = onAddCategoryClick,
     )
 }
 
@@ -97,6 +92,7 @@ private fun SettingsScreenImpl(
     onAutoImportCategoryChange: (String) -> Unit = {},
     onConvertToWavChange: (Boolean) -> Unit = {},
     onConvertExistingFilesToWavClick: () -> Unit = {},
+    onAddCategoryClick: () -> Unit = {},
 ) {
     var showConvertToWavDialog by remember { mutableStateOf(false) }
 
@@ -176,9 +172,10 @@ private fun SettingsScreenImpl(
                     Text(stringResource(R.string.auto_import_to_category))
                     CategoryDropdownMenu(
                         categories = uiState.categories,
-                        initialValue = uiState.autoImportCategory,
+                        selectedCategoryId = uiState.autoImportCategory?.id,
                         onSelect = { if (it != null) onAutoImportCategoryChange(it.id) },
                         emptyItemText = stringResource(R.string.not_set_parenthesis),
+                        onAddCategoryClick = onAddCategoryClick,
                     )
                     Text(
                         stringResource(R.string.if_not_set_the_first_category_will_be_used),
@@ -195,6 +192,18 @@ private fun SettingsScreenImpl(
             modifier = Modifier.fillMaxWidth()
         )
     }
+}
+
+@Composable
+fun ConvertToWavDialog(onDismiss: () -> Unit = {}, onConfirm: () -> Unit = {}) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.no_thank_you)) } },
+        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.yes_please)) } },
+        title = { Text(stringResource(R.string.convert_sounds_to_wav)) },
+        text = { Text(stringResource(R.string.convert_all_existing_non_wav_files)) },
+        shape = MaterialTheme.shapes.small,
+    )
 }
 
 @Preview(showSystemUi = true, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)

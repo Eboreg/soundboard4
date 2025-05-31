@@ -52,6 +52,7 @@ fun CategoryEditDialog(
     viewModel: CategoryEditViewModel = hiltViewModel(),
     wipState: WorkInProgressState = rememberWorkInProgressState(),
     onDismiss: () -> Unit = {},
+    onCreated: (Category) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val category by viewModel.category.collectAsStateWithLifecycle()
@@ -64,6 +65,7 @@ fun CategoryEditDialog(
         onSave = { category ->
             scope.launch {
                 wipState.run(Dispatchers.IO) { viewModel.save(category) }
+                if (isNew) onCreated(category)
                 onDismiss()
             }
         },

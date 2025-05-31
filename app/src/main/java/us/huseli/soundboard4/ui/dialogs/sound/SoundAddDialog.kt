@@ -38,9 +38,11 @@ import us.huseli.soundboard4.ui.utils.rememberWorkInProgressState
 
 @Composable
 fun SoundAddDialog(
+    selectedCategoryId: String? = null,
     viewModel: SoundAddViewModel = hiltViewModel(),
     wipState: WorkInProgressState = rememberWorkInProgressState(),
-    onDismiss: () -> Unit = {}
+    onDismiss: () -> Unit = {},
+    onAddCategoryClick: () -> Unit = {},
 ) {
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val sounds by viewModel.newSounds.collectAsStateWithLifecycle()
@@ -57,32 +59,36 @@ fun SoundAddDialog(
         onConfirmClick = { categoryId, singleSoundName, includeDuplicates ->
             scope.launch {
                 wipState.run(Dispatchers.IO) {
-                    viewModel.save(categoryId, singleSoundName, includeDuplicates)
+                    viewModel.save(categoryId, singleSoundName, includeDuplicates, wipState)
                 }
                 onDismiss()
             }
-        }
+        },
+        onAddCategoryClick = onAddCategoryClick,
+        selectedCategoryId = selectedCategoryId,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SoundAddDialogImpl(
-    sounds: List<TempSound>,
-    duplicateSounds: List<TempSound>,
-    errors: List<String>,
-    categories: List<Category>,
+    sounds: List<TempSound> = emptyList(),
+    duplicateSounds: List<TempSound> = emptyList(),
+    errors: List<String> = emptyList(),
+    categories: List<Category> = emptyList(),
+    selectedCategoryId: String? = null,
     onDismiss: () -> Unit = {},
     onConfirmClick: (String, String?, Boolean) -> Unit = { _, _, _ -> },
+    onAddCategoryClick: () -> Unit = {},
 ) {
-    var selectedCategory by remember(categories) { mutableStateOf(categories.firstOrNull()) }
+    var categoryId by remember(categories) { mutableStateOf(selectedCategoryId ?: categories.firstOrNull()?.id) }
     var includeDuplicates by remember { mutableStateOf(false) }
 
     val selectedSoundCount = remember(sounds, duplicateSounds, includeDuplicates) {
         sounds.size + if (includeDuplicates) duplicateSounds.size else 0
     }
-    val confirmButtonEnabled = remember(selectedSoundCount, selectedCategory) {
-        selectedCategory != null && selectedSoundCount > 0
+    val confirmButtonEnabled = remember(selectedSoundCount, categoryId) {
+        categoryId != null && selectedSoundCount > 0
     }
     val singleSound = remember(selectedSoundCount, sounds, duplicateSounds) {
         (sounds.firstOrNull() ?: duplicateSounds.firstOrNull())?.takeIf { selectedSoundCount == 1 }
@@ -94,7 +100,7 @@ private fun SoundAddDialogImpl(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
-                onClick = { onConfirmClick(selectedCategory!!.id, singleSoundName, includeDuplicates) },
+                onClick = { onConfirmClick(categoryId!!, singleSoundName, includeDuplicates) },
                 enabled = confirmButtonEnabled,
             ) { Text(stringResource(R.string.import_)) }
         },
@@ -118,8 +124,9 @@ private fun SoundAddDialogImpl(
 
                 CategoryDropdownMenu(
                     categories = categories,
-                    initialValue = selectedCategory,
-                    onSelect = { selectedCategory = it },
+                    selectedCategoryId = categoryId,
+                    onSelect = { categoryId = it?.id },
+                    onAddCategoryClick = onAddCategoryClick,
                 )
 
                 singleSoundName?.also { name ->

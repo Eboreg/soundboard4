@@ -18,6 +18,7 @@ import us.huseli.soundboard4.data.repository.SoundRepository
 import us.huseli.soundboard4.getInternalSoundDirectory
 import us.huseli.soundboard4.isWavMimeType
 import us.huseli.soundboard4.ui.states.SettingsUiState
+import us.huseli.soundboard4.ui.utils.WorkInProgressState
 import java.io.File
 import javax.inject.Inject
 
@@ -54,7 +55,7 @@ class SettingsViewModel @Inject constructor(
         )
     }.stateWhileSubscribed(SettingsUiState())
 
-    suspend fun convertExistingFilesToWav(context: Context) {
+    suspend fun convertExistingFilesToWav(context: Context, wipState: WorkInProgressState? = null) {
         val sounds = soundRepository.listAll().filterNot { it.mimeType.isWavMimeType() }
         var convertedFiles = 0
         val errors = mutableListOf<String>()
@@ -63,6 +64,8 @@ class SettingsViewModel @Inject constructor(
             val stem = sound.file.nameWithoutExtension
             val outFile = File(context.getInternalSoundDirectory(), "$stem.wav")
             val session = FFmpegKit.execute("-i \"${sound.file.path}\" -y \"${outFile.path}\"")
+
+            wipState?.addStatusRow(context.getString(R.string.converting_x, sound.name))
 
             if (session.returnCode.isValueSuccess) {
                 sound.file.delete()

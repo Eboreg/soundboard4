@@ -28,6 +28,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import us.huseli.soundboard4.Constants.CATEGORY_NAME_FONT_SIZE
 import us.huseli.soundboard4.R
 import us.huseli.soundboard4.rememberContentColorFor
 import us.huseli.soundboard4.ui.states.CategoryUiState
@@ -68,6 +70,7 @@ fun CategoryHeader(
                     modifier = Modifier.padding(vertical = 10.dp).weight(1f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    fontSize = CATEGORY_NAME_FONT_SIZE.sp,
                 )
                 IconButton(onClick = onMoveUpClick, enabled = !uiState.isFirst) {
                     Icon(Icons.Sharp.KeyboardArrowUp, stringResource(R.string.move_up))

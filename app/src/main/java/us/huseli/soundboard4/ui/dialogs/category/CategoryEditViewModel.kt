@@ -4,7 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import us.huseli.retaintheme.utils.AbstractBaseViewModel
 import us.huseli.soundboard4.data.database.model.Category
 import us.huseli.soundboard4.data.repository.CategoryRepository
@@ -20,8 +22,8 @@ class CategoryEditViewModel @Inject constructor(
     private val _destination = savedStateHandle.toRoute<CategoryEditDestination>()
     private val _isNew = MutableStateFlow(_destination.categoryId == null)
 
-    val category = _destination.categoryId
-        ?.let { categoryRepository.flowOne(it).stateWhileSubscribed(Category()) }
+    val category: StateFlow<Category> = _destination.categoryId
+        ?.let { categoryRepository.flowOne(it).filterNotNull().stateWhileSubscribed(Category()) }
         ?: MutableStateFlow(Category(backgroundColor = randomColor()))
     val isNew = _isNew.asStateFlow()
 

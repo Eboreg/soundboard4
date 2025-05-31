@@ -12,6 +12,10 @@ import kotlinx.coroutines.launch
 import us.huseli.retaintheme.extensions.launchOnIOThread
 import us.huseli.retaintheme.extensions.listItemsBetween
 import us.huseli.retaintheme.utils.AbstractBaseViewModel
+import us.huseli.soundboard4.Constants.SOUND_DURATION_FONT_SIZE
+import us.huseli.soundboard4.Constants.SOUND_DURATION_FONT_SIZE_LARGE
+import us.huseli.soundboard4.Constants.SOUND_NAME_FONT_SIZE
+import us.huseli.soundboard4.Constants.SOUND_NAME_FONT_SIZE_LARGE
 import us.huseli.soundboard4.data.database.model.SoundComparator
 import us.huseli.soundboard4.data.database.model.filterBySearchTerm
 import us.huseli.soundboard4.data.repository.CategoryRepository
@@ -38,8 +42,9 @@ class HomeViewModel @Inject constructor(
         soundRepository.searchTerm,
     ) { multimap, repressMode, selectedSounds, columnInfo, searchTerm ->
         val isSelectEnabled = selectedSounds.isNotEmpty()
-        val soundNameFontSize = if (columnInfo.widthDp > 150) 20.sp else 16.sp
-        val soundDurationFontSize = if (columnInfo.widthDp > 150) 14.sp else 12.sp
+        val soundNameFontSize = if (columnInfo.widthDp > 150) SOUND_NAME_FONT_SIZE_LARGE.sp else SOUND_NAME_FONT_SIZE.sp
+        val soundDurationFontSize =
+            if (columnInfo.widthDp > 150) SOUND_DURATION_FONT_SIZE_LARGE.sp else SOUND_DURATION_FONT_SIZE.sp
 
         HomeUiState(
             repressMode = repressMode,

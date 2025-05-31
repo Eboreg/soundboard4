@@ -27,6 +27,7 @@ import us.huseli.soundboard4.ui.states.HomeUiState
 import us.huseli.soundboard4.ui.states.SoundCardUiState
 import us.huseli.soundboard4.ui.theme.Soundboard4Theme
 import us.huseli.soundboard4.ui.topbar.TopBar
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun HomeScreen(
@@ -129,7 +130,7 @@ private fun HomeScreenPreview() {
                 backgroundColor = Color.Red,
                 isFirst = true,
                 soundCardUiStates = (1..6).map { idx ->
-                    SoundCardUiState(name = "sound $idx", backgroundColor = Color.Red)
+                    SoundCardUiState(name = "sound $idx", backgroundColor = Color.Red, duration = idx.seconds)
                 },
             ),
             CategoryUiState(
@@ -137,7 +138,7 @@ private fun HomeScreenPreview() {
                 backgroundColor = Color.Blue,
                 isFirst = true,
                 soundCardUiStates = (7..10).map { idx ->
-                    SoundCardUiState(name = "sound $idx", backgroundColor = Color.Blue)
+                    SoundCardUiState(name = "sound $idx", backgroundColor = Color.Blue, duration = idx.seconds)
                 },
             ),
         )

@@ -108,7 +108,7 @@ fun SoundCardImpl(
     modifier: Modifier = Modifier,
     progress: Float = 0f,
     playbackState: SoundPlayer.PlaybackState = SoundPlayer.PlaybackState.STOPPED,
-    duration: Duration = Duration.ZERO,
+    duration: Duration = uiState.duration,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {

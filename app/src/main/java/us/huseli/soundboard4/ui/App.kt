@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -70,7 +71,7 @@ fun App(viewModel: AppViewModel = hiltViewModel()) {
     val repressMode by viewModel.repressMode.collectAsStateWithLifecycle()
     val addSoundsLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         scope.launch {
-            if (wipState.run(Dispatchers.IO) { viewModel.importSoundsFromUris(uris) }) {
+            if (wipState.run(Dispatchers.IO) { viewModel.importSoundsFromUris(uris, wipState) }) {
                 navController.navigate(route = SoundAddDestination)
             }
         }
@@ -126,15 +127,32 @@ fun App(viewModel: AppViewModel = hiltViewModel()) {
                     )
                 }
 
-                composable<SettingsDestination> {
-                    SettingsScreen(onDismiss = { navController.navigate(route = HomeDestination) }, wipState = wipState)
+                composable<SettingsDestination> { backStackEntry ->
+                    SettingsScreen(
+                        onDismiss = { navController.navigate(route = HomeDestination) },
+                        onAddCategoryClick = { navController.navigate(route = CategoryEditDestination()) },
+                        wipState = wipState,
+                        selectedCategoryId = getSelectedCategoryId(backStackEntry.savedStateHandle),
+                    )
                 }
 
-                dialog<CategoryEditDestination> {
-                    CategoryEditDialog(onDismiss = { navController.popBackStack() }, wipState = wipState)
+                dialog<CategoryEditDestination> { backStackEntry ->
+                    CategoryEditDialog(
+                        onDismiss = { navController.popBackStack() },
+                        onCreated = { category ->
+                            navController.previousBackStackEntry?.savedStateHandle
+                                ?.set("selectedCategoryId", category.id)
+                        },
+                        wipState = wipState,
+                    )
                 }
-                dialog<SoundAddDestination> {
-                    SoundAddDialog(onDismiss = { navController.popBackStack() }, wipState = wipState)
+                dialog<SoundAddDestination> { backStackEntry ->
+                    SoundAddDialog(
+                        onDismiss = { navController.popBackStack() },
+                        onAddCategoryClick = { navController.navigate(route = CategoryEditDestination()) },
+                        wipState = wipState,
+                        selectedCategoryId = getSelectedCategoryId(backStackEntry.savedStateHandle),
+                    )
                 }
                 dialog<CategoryDeleteDestination> {
                     CategoryDeleteDialog(onDismiss = { navController.popBackStack() }, wipState = wipState)
@@ -142,12 +160,26 @@ fun App(viewModel: AppViewModel = hiltViewModel()) {
                 dialog<SoundDeleteDestination> {
                     SoundDeleteDialog(onDismiss = { navController.popBackStack() }, wipState = wipState)
                 }
-                dialog<SoundEditDestination> {
-                    SoundEditDialog(onDismiss = { navController.popBackStack() }, wipState = wipState)
+                dialog<SoundEditDestination> { backStackEntry ->
+                    SoundEditDialog(
+                        onDismiss = { navController.popBackStack() },
+                        onAddCategoryClick = { navController.navigate(route = CategoryEditDestination()) },
+                        wipState = wipState,
+                        selectedCategoryId = getSelectedCategoryId(backStackEntry.savedStateHandle),
+                    )
                 }
             }
         }
 
         WorkInProgressOverlay(wipState)
     }
+}
+
+@Composable
+fun getSelectedCategoryId(savedStateHandle: SavedStateHandle): String? {
+    val selectedCategoryId by savedStateHandle
+        .getStateFlow<String?>("selectedCategoryId", null)
+        .collectAsStateWithLifecycle()
+
+    return selectedCategoryId
 }

@@ -26,7 +26,7 @@ class CategoryRepository @Inject constructor(private val categoryDao: CategoryDa
 
     fun flowAllMultimaps(): Flow<Map<Category, List<Sound>>> = categoryDao.flowAllMultimaps()
 
-    fun flowOne(categoryId: String): Flow<Category> = categoryDao.flowOne(categoryId)
+    fun flowOne(categoryId: String): Flow<Category?> = categoryDao.flowOne(categoryId)
 
     suspend fun insert(category: Category): Long {
         val position = categoryDao.getHighestPosition()?.plus(1) ?: 0
@@ -36,7 +36,7 @@ class CategoryRepository @Inject constructor(private val categoryDao: CategoryDa
     suspend fun listAll(): List<Category> = categoryDao.listAll()
 
     suspend fun moveDown(categoryId: String) {
-        val category = categoryDao.get(categoryId)
+        val category = categoryDao.get(categoryId) ?: return
 
         categoryDao.getNext(category.position)?.also { next ->
             categoryDao.updateAll(
@@ -47,7 +47,7 @@ class CategoryRepository @Inject constructor(private val categoryDao: CategoryDa
     }
 
     suspend fun moveUp(categoryId: String) {
-        val category = categoryDao.get(categoryId)
+        val category = categoryDao.get(categoryId) ?: return
 
         categoryDao.getPrevious(category.position)?.also { previous ->
             categoryDao.updateAll(

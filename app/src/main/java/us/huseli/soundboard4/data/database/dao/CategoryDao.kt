@@ -20,10 +20,10 @@ abstract class CategoryDao : BaseDao<Category> {
     abstract fun flowAllMultimaps(): Flow<Map<Category, List<Sound>>>
 
     @Query("SELECT * FROM categories WHERE id = :categoryId")
-    abstract fun flowOne(categoryId: String): Flow<Category>
+    abstract fun flowOne(categoryId: String): Flow<Category?>
 
     @Query("SELECT * FROM categories WHERE id = :id")
-    abstract suspend fun get(id: String): Category
+    abstract suspend fun get(id: String): Category?
 
     @Query("SELECT MAX(position) FROM categories")
     abstract suspend fun getHighestPosition(): Int?

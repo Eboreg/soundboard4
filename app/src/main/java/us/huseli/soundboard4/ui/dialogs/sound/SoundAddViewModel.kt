@@ -7,6 +7,7 @@ import us.huseli.retaintheme.utils.AbstractBaseViewModel
 import us.huseli.soundboard4.data.repository.CategoryRepository
 import us.huseli.soundboard4.data.repository.SoundRepository
 import us.huseli.soundboard4.data.repository.TempSoundRepository
+import us.huseli.soundboard4.ui.utils.WorkInProgressState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,10 +29,11 @@ class SoundAddViewModel @Inject constructor(
         categoryId: String,
         singleSoundName: String?,
         includeDuplicates: Boolean,
+        wipState: WorkInProgressState? = null,
     ) {
         val toImport = tempSoundRepository.tempSounds.value
             .filter { includeDuplicates || !it.isDuplicate }
-        val sounds = tempSoundRepository.convertToSounds(toImport, categoryId)
+        val sounds = tempSoundRepository.convertToSounds(toImport, categoryId, wipState)
 
         if (toImport.size == 1 && singleSoundName != null) {
             soundRepository.insert(sounds.first().copy(name = singleSoundName))
