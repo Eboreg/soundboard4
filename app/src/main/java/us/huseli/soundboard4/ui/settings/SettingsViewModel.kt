@@ -15,6 +15,7 @@ import us.huseli.soundboard4.R
 import us.huseli.soundboard4.data.repository.CategoryRepository
 import us.huseli.soundboard4.data.repository.SettingsRepository
 import us.huseli.soundboard4.data.repository.SoundRepository
+import us.huseli.soundboard4.domain.AutoSoundImportUseCase
 import us.huseli.soundboard4.getInternalSoundDirectory
 import us.huseli.soundboard4.isWavMimeType
 import us.huseli.soundboard4.ui.states.SettingsUiState
@@ -27,6 +28,7 @@ class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     categoryRepository: CategoryRepository,
     private val soundRepository: SoundRepository,
+    private val autoSoundImportUseCase: AutoSoundImportUseCase,
 ) : AbstractBaseViewModel() {
     inner class AutoImportDirectoryContract : ActivityResultContracts.OpenDocumentTree() {
         override fun createIntent(context: Context, input: Uri?): Intent {
@@ -104,4 +106,6 @@ class SettingsViewModel @Inject constructor(
     fun setAutoImportDirectory(value: Uri) = settingsRepository.setAutoImportDirectory(value)
 
     fun setConvertToWav(value: Boolean) = settingsRepository.setConvertToWav(value)
+
+    fun startAutoSoundImport() = autoSoundImportUseCase()
 }

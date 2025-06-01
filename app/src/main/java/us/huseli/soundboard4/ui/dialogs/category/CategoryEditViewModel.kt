@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import us.huseli.retaintheme.utils.AbstractBaseViewModel
 import us.huseli.soundboard4.data.database.model.Category
 import us.huseli.soundboard4.data.repository.CategoryRepository
+import us.huseli.soundboard4.data.repository.UndoRepository
 import us.huseli.soundboard4.randomColor
 import us.huseli.soundboard4.ui.CategoryEditDestination
 import javax.inject.Inject
@@ -18,6 +19,7 @@ import javax.inject.Inject
 class CategoryEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val categoryRepository: CategoryRepository,
+    private val undoRepository: UndoRepository,
 ) : AbstractBaseViewModel() {
     private val _destination = savedStateHandle.toRoute<CategoryEditDestination>()
     private val _isNew = MutableStateFlow(_destination.categoryId == null)
@@ -30,5 +32,6 @@ class CategoryEditViewModel @Inject constructor(
     suspend fun save(category: Category) {
         if (_isNew.value) categoryRepository.insert(category)
         else categoryRepository.update(category)
+        undoRepository.pushUndoState()
     }
 }

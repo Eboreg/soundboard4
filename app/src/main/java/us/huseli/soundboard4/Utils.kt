@@ -72,7 +72,7 @@ private val decimalFormatInternal = DecimalFormat(".#").apply {
 }
 
 fun Duration.toShortString(): String = when {
-    inWholeMilliseconds < 0 -> "0s"
+    inWholeMilliseconds <= 0 -> "0s"
     inWholeMilliseconds < 950 -> decimalFormatInternal.format(inWholeMilliseconds.toDouble() / 1000) + "s"
     else -> (inWholeMilliseconds.toDouble() / 1000).roundToInt().toString() + "s"
 }

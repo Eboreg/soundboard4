@@ -13,6 +13,7 @@ import us.huseli.soundboard4.R
 import us.huseli.soundboard4.RepressMode
 import us.huseli.soundboard4.data.repository.SettingsRepository
 import us.huseli.soundboard4.data.repository.SoundRepository
+import us.huseli.soundboard4.data.repository.UndoRepository
 import us.huseli.soundboard4.domain.AutoSoundImportUseCase
 import us.huseli.soundboard4.domain.CleanCacheAndOrphansUseCase
 import us.huseli.soundboard4.domain.ManualSoundImportUseCase
@@ -27,7 +28,8 @@ class AppViewModel @Inject constructor(
     private val soundRepository: SoundRepository,
     private val soundPlayerRepository: SoundPlayerRepository,
     private val autoSoundImportUseCase: AutoSoundImportUseCase,
-    private val cleanCacheAndOrphansUseCase: CleanCacheAndOrphansUseCase,
+    cleanCacheAndOrphansUseCase: CleanCacheAndOrphansUseCase,
+    private val undoRepository: UndoRepository,
 ) : AbstractBaseViewModel() {
     val isSelectEnabled = soundRepository.selectedSounds.map { it.isNotEmpty() }.stateWhileSubscribed(false)
     val repressMode = settingsRepository.repressMode
@@ -35,18 +37,19 @@ class AppViewModel @Inject constructor(
     val totalSoundCount = soundRepository.filteredSounds.map { it.size }.stateWhileSubscribed(0)
     val canZoomIn = settingsRepository.canZoomIn.stateWhileSubscribed(true)
     val searchTerm = soundRepository.searchTerm
+    val canUndo = undoRepository.canUndo.stateWhileSubscribed(false)
+    val canRedo = undoRepository.canRedo.stateWhileSubscribed(false)
 
     init {
-        launchOnIOThread {
-            autoSoundImportUseCase()
-            cleanCacheAndOrphansUseCase()
-        }
+        cleanCacheAndOrphansUseCase(onFinish = { autoSoundImportUseCase() })
     }
 
     fun deselectAllSounds() = soundRepository.deselectAllSounds()
 
     suspend fun importSoundsFromUris(uris: List<Uri>, wipState: WorkInProgressState? = null): Boolean =
         manualSoundImportUseCase(uris, wipState)
+
+    fun redo() = undoRepository.redo()
 
     fun selectAllSounds() {
         viewModelScope.launch {
@@ -63,6 +66,8 @@ class AppViewModel @Inject constructor(
     fun setSearchTerm(value: String?) = soundRepository.setSearchTerm(value)
 
     fun stopAllPlayers() = soundPlayerRepository.stopAllPlayers()
+
+    fun undo() = undoRepository.undo()
 
     fun zoomIn(context: Context) {
         settingsRepository.zoomIn().also {

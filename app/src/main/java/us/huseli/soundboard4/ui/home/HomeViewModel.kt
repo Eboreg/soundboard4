@@ -21,6 +21,7 @@ import us.huseli.soundboard4.data.database.model.filterBySearchTerm
 import us.huseli.soundboard4.data.repository.CategoryRepository
 import us.huseli.soundboard4.data.repository.SettingsRepository
 import us.huseli.soundboard4.data.repository.SoundRepository
+import us.huseli.soundboard4.data.repository.UndoRepository
 import us.huseli.soundboard4.player.SoundPlayerRepository
 import us.huseli.soundboard4.ui.states.CategoryUiState
 import us.huseli.soundboard4.ui.states.HomeUiState
@@ -33,6 +34,7 @@ class HomeViewModel @Inject constructor(
     private val soundRepository: SoundRepository,
     private val categoryRepository: CategoryRepository,
     private val soundPlayerRepository: SoundPlayerRepository,
+    private val undoRepository: UndoRepository,
 ) : AbstractBaseViewModel() {
     val homeUiState = combine(
         categoryRepository.flowAllMultimaps(),
@@ -83,11 +85,17 @@ class HomeViewModel @Inject constructor(
     fun deselectSound(soundId: String) = soundRepository.deselectSound(soundId)
 
     fun moveCategoryDown(categoryId: String) {
-        launchOnIOThread { categoryRepository.moveDown(categoryId) }
+        launchOnIOThread {
+            categoryRepository.moveDown(categoryId)
+            undoRepository.pushUndoState()
+        }
     }
 
     fun moveCategoryUp(categoryId: String) {
-        launchOnIOThread { categoryRepository.moveUp(categoryId) }
+        launchOnIOThread {
+            categoryRepository.moveUp(categoryId)
+            undoRepository.pushUndoState()
+        }
     }
 
     fun selectSound(soundId: String) = soundRepository.selectSound(soundId)

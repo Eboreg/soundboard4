@@ -13,4 +13,6 @@ data class CategoryUiState(
     val isFirst: Boolean = false,
     val isLast: Boolean = false,
     val soundCardUiStates: List<SoundCardUiState> = emptyList(),
-)
+) {
+    val nameWithSoundCount: String = "$name (${soundCardUiStates.size})"
+}

@@ -81,6 +81,8 @@ fun App(viewModel: AppViewModel = hiltViewModel()) {
     val totalSoundCount by viewModel.totalSoundCount.collectAsStateWithLifecycle()
     val canZoomIn by viewModel.canZoomIn.collectAsStateWithLifecycle()
     val searchTerm by viewModel.searchTerm.collectAsStateWithLifecycle()
+    val canUndo by viewModel.canUndo.collectAsStateWithLifecycle()
+    val canRedo by viewModel.canRedo.collectAsStateWithLifecycle()
 
     LaunchedEffect(configuration.orientation) { viewModel.setOrientation(configuration.orientation) }
     LaunchedEffect(configuration.screenWidthDp) { viewModel.setScreenWidthDp(configuration.screenWidthDp) }
@@ -101,6 +103,8 @@ fun App(viewModel: AppViewModel = hiltViewModel()) {
                     repressMode = repressMode,
                     canZoomIn = canZoomIn,
                     searchTerm = searchTerm,
+                    canUndo = canUndo,
+                    canRedo = canRedo,
                     onRepressModeChange = viewModel::setRepressMode,
                     onAddCategoryClick = { navController.navigate(route = CategoryEditDestination()) },
                     onAddSoundsClick = { addSoundsLauncher.launch("audio/*") },
@@ -109,6 +113,8 @@ fun App(viewModel: AppViewModel = hiltViewModel()) {
                     onSearchTermChange = viewModel::setSearchTerm,
                     onSettingsClick = { navController.navigate(route = SettingsDestination) },
                     onStopAllPlaybackClick = viewModel::stopAllPlayers,
+                    onUndoClick = viewModel::undo,
+                    onRedoClick = viewModel::redo,
                 )
             },
             modifier = Modifier.fillMaxSize(),

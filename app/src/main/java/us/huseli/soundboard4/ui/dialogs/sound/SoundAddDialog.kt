@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -30,8 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import us.huseli.soundboard4.R
-import us.huseli.soundboard4.data.database.model.Category
-import us.huseli.soundboard4.data.model.TempSound
+import us.huseli.soundboard4.ui.states.SoundAddUiState
 import us.huseli.soundboard4.ui.utils.CategoryDropdownMenu
 import us.huseli.soundboard4.ui.utils.WorkInProgressState
 import us.huseli.soundboard4.ui.utils.rememberWorkInProgressState
@@ -44,107 +41,127 @@ fun SoundAddDialog(
     onDismiss: () -> Unit = {},
     onAddCategoryClick: () -> Unit = {},
 ) {
-    val categories by viewModel.categories.collectAsStateWithLifecycle()
-    val sounds by viewModel.newSounds.collectAsStateWithLifecycle()
-    val duplicateSounds by viewModel.duplicateSounds.collectAsStateWithLifecycle()
-    val errors by viewModel.errors.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    var categoryId by remember(uiState.categories, selectedCategoryId) {
+        mutableStateOf(selectedCategoryId ?: uiState.categories.firstOrNull()?.id)
+    }
+    var singleSoundName by remember(uiState.singleSound) { mutableStateOf(uiState.singleSound?.name) }
 
     SoundAddDialogImpl(
-        sounds = sounds,
-        duplicateSounds = duplicateSounds,
-        errors = errors,
-        categories = categories,
+        uiState = uiState,
+        singleSoundName = singleSoundName,
         onDismiss = onDismiss,
-        onConfirmClick = { categoryId, singleSoundName, includeDuplicates ->
+        onConfirmClick = {
             scope.launch {
-                wipState.run(Dispatchers.IO) {
-                    viewModel.save(categoryId, singleSoundName, includeDuplicates, wipState)
+                categoryId?.also {
+                    wipState.run(Dispatchers.IO) { viewModel.save(it, singleSoundName, wipState) }
+                    onDismiss()
                 }
-                onDismiss()
             }
         },
         onAddCategoryClick = onAddCategoryClick,
-        selectedCategoryId = selectedCategoryId,
+        categoryId = categoryId,
+        onCategorySelect = { categoryId = it },
+        onNameChange = { singleSoundName = it },
+        onIncludeDuplicatesChange = viewModel::setIncludeDuplicates,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SoundAddDialogImpl(
-    sounds: List<TempSound> = emptyList(),
-    duplicateSounds: List<TempSound> = emptyList(),
-    errors: List<String> = emptyList(),
-    categories: List<Category> = emptyList(),
-    selectedCategoryId: String? = null,
+    uiState: SoundAddUiState = SoundAddUiState(),
+    categoryId: String? = null,
+    singleSoundName: String? = null,
     onDismiss: () -> Unit = {},
-    onConfirmClick: (String, String?, Boolean) -> Unit = { _, _, _ -> },
+    onConfirmClick: () -> Unit = {},
     onAddCategoryClick: () -> Unit = {},
+    onCategorySelect: (String?) -> Unit = {},
+    onNameChange: (String) -> Unit = {},
+    onIncludeDuplicatesChange: (Boolean) -> Unit = {},
 ) {
-    var categoryId by remember(categories) { mutableStateOf(selectedCategoryId ?: categories.firstOrNull()?.id) }
-    var includeDuplicates by remember { mutableStateOf(false) }
-
-    val selectedSoundCount = remember(sounds, duplicateSounds, includeDuplicates) {
-        sounds.size + if (includeDuplicates) duplicateSounds.size else 0
+    val netSoundCount = remember(uiState.newSoundCount, uiState.duplicateSoundCount, uiState.includeDuplicates) {
+        uiState.newSoundCount + if (uiState.includeDuplicates) uiState.duplicateSoundCount else 0
     }
-    val confirmButtonEnabled = remember(selectedSoundCount, categoryId) {
-        categoryId != null && selectedSoundCount > 0
+    val confirmButtonEnabled = remember(netSoundCount, categoryId) {
+        categoryId != null && netSoundCount > 0
     }
-    val singleSound = remember(selectedSoundCount, sounds, duplicateSounds) {
-        (sounds.firstOrNull() ?: duplicateSounds.firstOrNull())?.takeIf { selectedSoundCount == 1 }
-    }
-
-    var singleSoundName by remember(singleSound) { mutableStateOf(singleSound?.name) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(
-                onClick = { onConfirmClick(categoryId!!, singleSoundName, includeDuplicates) },
-                enabled = confirmButtonEnabled,
-            ) { Text(stringResource(R.string.import_)) }
+            TextButton(onClick = onConfirmClick, enabled = confirmButtonEnabled) {
+                Text(
+                    if (netSoundCount > 0) pluralStringResource(R.plurals.add_x_sounds, netSoundCount, netSoundCount)
+                    else stringResource(R.string.no_sounds_to_add)
+                )
+            }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
         shape = MaterialTheme.shapes.small,
-        title = { Text(pluralStringResource(R.plurals.add_sound, selectedSoundCount)) },
+        title = { Text(pluralStringResource(R.plurals.add_sound, uiState.totalSoundCount)) },
         text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                if (sounds.isNotEmpty())
-                    Text(pluralStringResource(R.plurals.x_new_sounds_to_import, sounds.size, sounds.size))
-                if (duplicateSounds.isNotEmpty())
-                    Text(pluralStringResource(R.plurals.x_duplicate_sounds, duplicateSounds.size, duplicateSounds.size))
-                if (errors.isNotEmpty()) {
-                    Text(pluralStringResource(R.plurals.x_errors, errors.size, errors.size))
-                    for (error in errors) {
-                        Text(error, modifier = Modifier.padding(start = 10.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    pluralStringResource(
+                        R.plurals.x_sounds_found,
+                        uiState.totalSoundCount,
+                        uiState.totalSoundCount,
+                    )
+                )
+
+                if (uiState.errors.isNotEmpty()) {
+                    Column {
+                        Text(pluralStringResource(R.plurals.x_errors, uiState.errors.size, uiState.errors.size))
+                        for (error in uiState.errors) {
+                            Text(error, modifier = Modifier.padding(start = 10.dp))
+                        }
                     }
                 }
 
-                CategoryDropdownMenu(
-                    categories = categories,
-                    selectedCategoryId = categoryId,
-                    onSelect = { categoryId = it?.id },
-                    onAddCategoryClick = onAddCategoryClick,
-                )
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.category))
+                    CategoryDropdownMenu(
+                        categories = uiState.categories,
+                        selectedCategoryId = categoryId,
+                        onSelect = { onCategorySelect(it?.id) },
+                        onAddCategoryClick = onAddCategoryClick,
+                    )
+                }
 
                 singleSoundName?.also { name ->
                     OutlinedTextField(
                         value = name,
-                        onValueChange = { singleSoundName = it },
+                        onValueChange = onNameChange,
                         label = { Text(stringResource(R.string.name)) },
                     )
                 }
 
-                if (duplicateSounds.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(stringResource(R.string.import_duplicate_sounds))
-                        Switch(checked = includeDuplicates, onCheckedChange = { includeDuplicates = it })
+                if (uiState.duplicateSoundCount > 0) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            pluralStringResource(
+                                R.plurals.x_sounds_already_in_database,
+                                uiState.duplicateSoundCount,
+                                uiState.duplicateSoundCount,
+                            ) + " " + pluralStringResource(
+                                R.plurals.add_anyway_question,
+                                uiState.duplicateSoundCount,
+                                uiState.duplicateSoundCount,
+                            )
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(pluralStringResource(R.plurals.add_duplicate_sounds, uiState.duplicateSoundCount))
+                            Switch(checked = uiState.includeDuplicates, onCheckedChange = onIncludeDuplicatesChange)
+                        }
                     }
                 }
             }

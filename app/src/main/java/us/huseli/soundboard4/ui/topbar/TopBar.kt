@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.sharp.Redo
+import androidx.compose.material.icons.automirrored.sharp.Undo
 import androidx.compose.material.icons.sharp.Add
 import androidx.compose.material.icons.sharp.Block
 import androidx.compose.material.icons.sharp.CreateNewFolder
@@ -34,6 +36,8 @@ enum class TopBarDropdownMenuItem(val text: Int, val icon: ImageVector) {
     AddCategory(R.string.add_category, Icons.Sharp.CreateNewFolder),
     ZoomIn(R.string.zoom_in, Icons.Sharp.ZoomIn),
     ZoomOut(R.string.zoom_out, Icons.Sharp.ZoomOut),
+    Undo(R.string.undo, Icons.AutoMirrored.Sharp.Undo),
+    Redo(R.string.redo, Icons.AutoMirrored.Sharp.Redo),
     Settings(R.string.settings, Icons.Sharp.Settings),
 }
 
@@ -44,6 +48,8 @@ fun TopBar(
     repressMode: RepressMode = RepressMode.STOP,
     canZoomIn: Boolean = true,
     searchTerm: String? = null,
+    canUndo: Boolean = false,
+    canRedo: Boolean = false,
     onRepressModeChange: (RepressMode) -> Unit = {},
     onAddCategoryClick: () -> Unit = {},
     onAddSoundsClick: () -> Unit = {},
@@ -52,6 +58,8 @@ fun TopBar(
     onSearchTermChange: (String?) -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onStopAllPlaybackClick: () -> Unit = {},
+    onUndoClick: () -> Unit = {},
+    onRedoClick: () -> Unit = {},
 ) {
     TopAppBar(
         title = {},
@@ -94,11 +102,15 @@ fun TopBar(
                                 TopBarDropdownMenuItem.ZoomIn -> onZoomIn()
                                 TopBarDropdownMenuItem.ZoomOut -> onZoomOut()
                                 TopBarDropdownMenuItem.Settings -> onSettingsClick()
+                                TopBarDropdownMenuItem.Undo -> onUndoClick()
+                                TopBarDropdownMenuItem.Redo -> onRedoClick()
                             }
                         },
                         isItemEnabled = { item ->
                             when (item) {
                                 TopBarDropdownMenuItem.ZoomIn -> canZoomIn
+                                TopBarDropdownMenuItem.Undo -> canUndo
+                                TopBarDropdownMenuItem.Redo -> canRedo
                                 else -> true
                             }
                         },

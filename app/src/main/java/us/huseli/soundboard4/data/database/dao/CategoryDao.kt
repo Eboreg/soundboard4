@@ -8,6 +8,9 @@ import us.huseli.soundboard4.data.database.model.Sound
 
 @Dao
 abstract class CategoryDao : BaseDao<Category> {
+    @Query("DELETE FROM categories")
+    abstract suspend fun deleteAll()
+
     @Query("SELECT * FROM categories ORDER BY position")
     abstract fun flowAll(): Flow<List<Category>>
 

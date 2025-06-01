@@ -1,7 +1,5 @@
 package us.huseli.soundboard4.data.repository
 
-import androidx.core.net.toFile
-import androidx.core.net.toUri
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,13 +23,7 @@ class SoundRepository @Inject constructor(private val soundDao: SoundDao) {
         sounds.filter { selectedSoundIds.contains(it.id) }
     }
 
-    suspend fun deleteAll(sounds: List<Sound>) {
-        for (sound in sounds) {
-            val uri = sound.uri.toUri().buildUpon().scheme("file").build()
-            uri.toFile().delete()
-        }
-        soundDao.deleteAll(sounds)
-    }
+    suspend fun deleteAll(sounds: List<Sound>) = soundDao.deleteAll(sounds)
 
     fun deselectAllSounds() {
         _selectedSoundIds.value = emptySet()
@@ -40,6 +32,8 @@ class SoundRepository @Inject constructor(private val soundDao: SoundDao) {
     fun deselectSound(soundId: String) {
         _selectedSoundIds.value -= soundId
     }
+
+    fun flow(soundId: String) = soundDao.flow(soundId)
 
     fun flowByCategoryId(categoryId: String): Flow<List<Sound>> = soundDao.flowByCategoryId(categoryId)
 
@@ -70,4 +64,6 @@ class SoundRepository @Inject constructor(private val soundDao: SoundDao) {
     suspend fun update(sound: Sound) = soundDao.update(sound)
 
     suspend fun updateAll(sounds: List<Sound>) = soundDao.updateAll(sounds)
+
+    suspend fun updateDuration(soundId: String, durationMs: Long) = soundDao.updateDuration(soundId, durationMs)
 }

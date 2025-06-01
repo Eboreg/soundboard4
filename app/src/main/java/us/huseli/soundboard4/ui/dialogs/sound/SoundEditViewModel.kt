@@ -5,12 +5,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import us.huseli.retaintheme.utils.AbstractBaseViewModel
 import us.huseli.soundboard4.data.repository.CategoryRepository
 import us.huseli.soundboard4.data.repository.SoundRepository
+import us.huseli.soundboard4.data.repository.UndoRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class SoundEditViewModel @Inject constructor(
     private val soundRepository: SoundRepository,
     categoryRepository: CategoryRepository,
+    private val undoRepository: UndoRepository,
 ) : AbstractBaseViewModel() {
     val sounds = soundRepository.selectedSounds.stateWhileSubscribed(emptyList())
     val categories = categoryRepository.flowAll().stateWhileSubscribed(emptyList())
@@ -26,6 +28,7 @@ class SoundEditViewModel @Inject constructor(
                 )
             }
         )
+        undoRepository.pushUndoState()
     }
 }
 

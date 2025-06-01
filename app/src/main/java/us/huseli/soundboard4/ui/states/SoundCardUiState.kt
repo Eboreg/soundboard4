@@ -34,13 +34,13 @@ data class SoundCardUiState(
 ) {
     constructor(
         sound: Sound,
+        player: SoundPlayer,
         backgroundColor: Color = Color.Companion.White,
         repressMode: RepressMode = RepressMode.STOP,
         isSelectEnabled: Boolean = false,
         isSelected: Boolean = false,
         nameFontSize: TextUnit = SOUND_NAME_FONT_SIZE.sp,
         durationFontSize: TextUnit = SOUND_DURATION_FONT_SIZE.sp,
-        player: SoundPlayer = SoundPlayer(sound),
     ) : this(
         id = sound.id,
         uri = sound.uri,

@@ -29,7 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 )
 @Immutable
 data class Sound(
-    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    @PrimaryKey override val id: String = UUID.randomUUID().toString(),
     val name: String = "",
     val uri: String = "",
     val duration: Duration = 0.seconds,
@@ -39,7 +39,7 @@ data class Sound(
     val created: Instant = Instant.now(),
     val playCount: Int = 0,
     val mimeType: String = "",
-) {
+) : IModel<Sound> {
     val file: File
         get() = uri.toUri().buildUpon().scheme("file").build().toFile()
 }

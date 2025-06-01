@@ -49,7 +49,7 @@ fun CategoryHeader(
 
     Column(
         modifier = Modifier
-            .padding(bottom = 4.dp)
+            .padding(bottom = 3.dp)
             .fillMaxWidth()
     ) {
         Row(
@@ -66,7 +66,7 @@ fun CategoryHeader(
                     )
                 }
                 Text(
-                    uiState.name,
+                    uiState.nameWithSoundCount,
                     modifier = Modifier.padding(vertical = 10.dp).weight(1f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -91,7 +91,7 @@ fun CategoryHeader(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
                 .fillMaxWidth()
-                .height(1.dp)
+                .height(2.dp)
         )
     }
 }

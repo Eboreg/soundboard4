@@ -66,7 +66,12 @@ fun SettingsScreen(
     SettingsScreenImpl(
         modifier = modifier,
         uiState = uiState,
-        onDismiss = onDismiss,
+        onDismiss = {
+            if (uiState.autoImport && uiState.autoImportDirectory != null) {
+                viewModel.startAutoSoundImport()
+            }
+            onDismiss()
+        },
         onAutoImportChange = viewModel::setAutoImport,
         onAutoImportDirectoryClick = {
             autoImportDirectoryLauncher.launch(uiState.autoImportDirectory)

@@ -7,6 +7,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -25,13 +26,17 @@ fun SoundDeleteDialog(
 ) {
     val soundCount by viewModel.soundCount.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     SoundDeleteDialogImpl(
         soundCount = soundCount,
         onDismiss = onDismiss,
         onConfirm = {
             scope.launch {
-                wipState.run(Dispatchers.IO) { viewModel.delete() }
+                wipState.run(
+                    Dispatchers.IO,
+                    context.resources.getQuantityString(R.plurals.deleting_x_sounds, soundCount, soundCount),
+                ) { viewModel.delete() }
                 onDismiss()
             }
         },

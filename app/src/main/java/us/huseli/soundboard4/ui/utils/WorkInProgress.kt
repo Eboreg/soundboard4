@@ -5,9 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -89,23 +92,24 @@ fun WorkInProgressOverlay(wipState: WorkInProgressState) {
             properties = DialogProperties(dismissOnBackPress = false, usePlatformDefaultWidth = false),
         ) {
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.3f))
                     .zIndex(100f)
             ) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(5.dp),
                     modifier = Modifier
-                        .fillMaxHeight(0.5f)
                         .fillMaxWidth()
+                        .fillMaxHeight(0.75f)
                         .padding(10.dp)
-                        .padding(top = 20.dp)
                         .align(Alignment.BottomCenter)
                 ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(10.dp))
                     for (statusRow in wipState.statusRows) {
-                        Text(statusRow, color = MaterialTheme.colorScheme.onSurface)
+                        Text(statusRow, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
                     }
                 }
             }
@@ -120,7 +124,7 @@ fun WorkInProgressOverlayPreview() {
 
     LaunchedEffect(Unit) {
         for (idx in 1..20) {
-            state.addStatusRow("neger $idx")
+            state.addStatusRow("task $idx")
             delay(1000)
         }
     }

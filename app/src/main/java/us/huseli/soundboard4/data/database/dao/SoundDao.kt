@@ -7,6 +7,12 @@ import us.huseli.soundboard4.data.database.model.Sound
 
 @Dao
 abstract class SoundDao : BaseDao<Sound> {
+    @Query("DELETE FROM sounds")
+    abstract suspend fun deleteAll()
+
+    @Query("SELECT * FROM sounds WHERE id = :id")
+    abstract fun flow(id: String): Flow<Sound?>
+
     @Query("SELECT * FROM sounds")
     abstract fun flowAll(): Flow<List<Sound>>
 
@@ -18,4 +24,7 @@ abstract class SoundDao : BaseDao<Sound> {
 
     @Query("SELECT * FROM sounds")
     abstract suspend fun listAll(): List<Sound>
+
+    @Query("UPDATE sounds SET duration = :durationMs WHERE id = :id")
+    abstract suspend fun updateDuration(id: String, durationMs: Long)
 }

@@ -34,7 +34,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class SoundPlayer(
     private val uri: String,
-    private val volume: Float = 1f,
+    volume: Float = 1f,
     duration: Duration = Duration.ZERO,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main),
 ) : Player.Listener {
@@ -44,26 +44,28 @@ class SoundPlayer(
     enum class PlaybackState { CREATED, STOPPED, PLAYING, PAUSED, ERROR }
 
     interface Listener {
+        fun onDurationChanged(durationMs: Long) {}
         fun onPlaybackEnded() {}
     }
 
     private val _createPlayerLock = Mutex()
-    private var _duration by mutableLongStateOf(duration.inWholeMilliseconds)
+    private var _durationMs by mutableLongStateOf(duration.inWholeMilliseconds)
     private val _listeners = mutableListOf<Listener>()
     private val _oldPlayers = mutableListOf<ExoPlayer>()
     private var _playbackPosition by mutableLongStateOf(0)
     private var _playbackPositionJob: Job? = null
     private var _playbackState by mutableStateOf(PlaybackState.CREATED)
     private var _player: ExoPlayer? = null
+    private var _volume: Float = volume
 
     val duration: Duration
-        get() = _duration.milliseconds
+        get() = _durationMs.milliseconds
 
     val playbackState: PlaybackState
         get() = _playbackState
 
     val progress: Float
-        get() = if (_duration > 0) _playbackPosition.toFloat() / _duration else 0f
+        get() = if (_durationMs > 0) _playbackPosition.toFloat() / _durationMs else 0f
 
     fun addListener(listener: Listener) {
         if (!_listeners.contains(listener)) _listeners.add(listener)
@@ -72,9 +74,7 @@ class SoundPlayer(
     fun initialize(context: Context) {
         if (_player == null) {
             scope.launch(Dispatchers.Main) {
-                _createPlayerLock.withLock {
-                    _player = createPlayer(context)
-                }
+                _player = _createPlayerLock.withLock { createPlayer(context) }
                 _playbackState = PlaybackState.STOPPED
             }
         }
@@ -155,6 +155,14 @@ class SoundPlayer(
         }
     }
 
+    fun setVolume(value: Float) {
+        if (value != _volume) {
+            _volume = value
+            _player?.volume = value
+            _oldPlayers.forEach { it.volume = value }
+        }
+    }
+
     fun stop() {
         logPlayerStatus("stop")
         _player?.stop()
@@ -169,7 +177,7 @@ class SoundPlayer(
             .setPriority(C.PRIORITY_MAX)
             .build().apply {
                 setMediaItem(MediaItem.fromUri(uri))
-                volume = this@SoundPlayer.volume
+                volume = _volume
                 addListener(this@SoundPlayer)
             }
     }
@@ -232,7 +240,7 @@ class SoundPlayer(
                     it.playbackState == Player.STATE_READY && !it.playWhenReady -> PlaybackState.PAUSED
                     else -> PlaybackState.STOPPED
                 },
-                "onIsPlayingChanged"
+                "onIsPlayingChanged",
             )
         }
     }
@@ -251,8 +259,13 @@ class SoundPlayer(
     }
 
     override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-        _player?.also {
-            if (it.duration > 0 && it.duration != _duration) _duration = it.duration
+        if (reason == Player.TIMELINE_CHANGE_REASON_SOURCE_UPDATE) {
+            _player?.also { player ->
+                if (player.duration > 0 && player.duration != _durationMs) {
+                    _durationMs = player.duration
+                    _listeners.forEach { it.onDurationChanged(_durationMs) }
+                }
+            }
         }
     }
 

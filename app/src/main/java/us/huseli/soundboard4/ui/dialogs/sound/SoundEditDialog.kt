@@ -22,6 +22,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ fun SoundEditDialog(
     val sounds by viewModel.sounds.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     SoundEditDialogImpl(
         sounds = sounds,
@@ -54,7 +56,10 @@ fun SoundEditDialog(
         onDismiss = onDismiss,
         onConfirm = { params ->
             scope.launch {
-                wipState.run(Dispatchers.IO) { viewModel.save(params) }
+                wipState.run(
+                    Dispatchers.IO,
+                    context.resources.getQuantityString(R.plurals.saving_x_sounds, sounds.size, sounds.size),
+                ) { viewModel.save(params) }
                 onDismiss()
             }
         },

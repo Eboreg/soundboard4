@@ -17,3 +17,7 @@ data class TempSound(
     val isDuplicate: Boolean = false,
     val mimeType: String = "",
 )
+
+fun Iterable<TempSound>.duplicates() = filter { it.isDuplicate }
+
+fun Iterable<TempSound>.nonDuplicates() = filter { !it.isDuplicate }

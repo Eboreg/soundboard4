@@ -7,6 +7,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,6 +29,7 @@ fun CategoryDeleteDialog(
     val category by viewModel.category.collectAsStateWithLifecycle()
     val sounds by viewModel.sounds.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     category?.also {
         CategoryDeleteDialogImpl(
@@ -36,7 +38,7 @@ fun CategoryDeleteDialog(
             onDismiss = onDismiss,
             onConfirm = {
                 scope.launch {
-                    wipState.run(Dispatchers.IO) { viewModel.delete() }
+                    wipState.run(Dispatchers.IO, context.getString(R.string.deleting_x, it.name)) { viewModel.delete() }
                     onDismiss()
                 }
             },

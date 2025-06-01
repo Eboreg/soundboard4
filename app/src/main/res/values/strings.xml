@@ -22,8 +22,6 @@
     <string name="error_s_when_auto_importing_sounds">Error(s) when auto importing sounds: %1$s</string>
     <string name="exit_selection_mode">Exit selection mode</string>
     <string name="if_not_set_the_first_category_will_be_used">If not set, the first category will be used.</string>
-    <string name="import_">Import</string>
-    <string name="import_duplicate_sounds">Import duplicate sounds</string>
     <string name="length">Length</string>
     <string name="move_down">Move down</string>
     <string name="move_up">Move up</string>
@@ -58,6 +56,27 @@
     <string name="saving_x">Saving %1$s</string>
     <string name="importing_x">Importing %1$s</string>
     <string name="converting_x">Converting %1$s</string>
+    <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
+    <string name="deleting_x">Deleting %1$s</string>
+    <string name="no_sounds_to_add">No sounds to add</string>
+    <plurals name="add_duplicate_sounds">
+        <item quantity="one">Add duplicate sound</item>
+        <item quantity="other">Add duplicate sounds</item>
+    </plurals>
+    <plurals name="x_sounds_found">
+        <item quantity="zero">No sounds were found.</item>
+        <item quantity="one">One sound was found.</item>
+        <item quantity="other">%1$d sounds were found.</item>
+    </plurals>
+    <plurals name="saving_x_sounds">
+        <item quantity="one">Saving sound</item>
+        <item quantity="other">Saving %1$d sounds</item>
+    </plurals>
+    <plurals name="deleting_x_sounds">
+        <item quantity="one">Deleting sound</item>
+        <item quantity="other">Deleting %1$d sounds</item>
+    </plurals>
     <plurals name="converted_x_files_to_wav">
         <item quantity="one">Converted one file to WAV.</item>
         <item quantity="other">Converted %1$d files to WAV.</item>
@@ -66,9 +85,9 @@
         <item quantity="one">Failed converting one file to WAV.</item>
         <item quantity="other">Failed converting %1$d files to WAV.</item>
     </plurals>
-    <plurals name="x_new_sounds_were_imported">
-        <item quantity="one">One new sound was imported.</item>
-        <item quantity="other">%1$d new sounds were imported.</item>
+    <plurals name="x_new_sounds_were_auto_imported">
+        <item quantity="one">One new sound was auto imported.</item>
+        <item quantity="other">%1$d new sounds were auto imported.</item>
     </plurals>
     <plurals name="add_sound">
         <item quantity="one">Add sound</item>
@@ -102,8 +121,16 @@
         <item quantity="one">1 error:</item>
         <item quantity="other">%1$d errors:</item>
     </plurals>
-    <plurals name="x_new_sounds_to_import">
-        <item quantity="one">1 new sound to import</item>
-        <item quantity="other">%1$d new sounds to import</item>
+    <plurals name="x_sounds_already_in_database">
+        <item quantity="one">One sound already exists in the database.</item>
+        <item quantity="other">%1$d sounds already exist in the database.</item>
+    </plurals>
+    <plurals name="add_anyway_question">
+        <item quantity="one">Do you want to add it anyway?</item>
+        <item quantity="other">Do you want to add them anyway?</item>
+    </plurals>
+    <plurals name="add_x_sounds">
+        <item quantity="one">Add one sound</item>
+        <item quantity="other">Add %1$d sounds</item>
     </plurals>
 </resources>
