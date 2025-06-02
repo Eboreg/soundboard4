@@ -1,8 +1,8 @@
 package us.huseli.soundboard4.ui.topbar
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import us.huseli.soundboard4.R
 import us.huseli.soundboard4.ui.dialogs.HallonDialog
 
@@ -26,12 +27,11 @@ fun TopBarLogo(modifier: Modifier = Modifier) {
     Image(
         painter = painterResource(R.drawable.ic_launcher_round),
         contentDescription = null,
-        modifier = modifier.clickable {
+        modifier = modifier.height(40.dp).clickable {
             val now = System.currentTimeMillis()
 
             clickTimes.removeIf { it + 1000 < now }
             clickTimes.add(now)
-            Log.i("TopBarLogo", clickTimes.toString())
             if (clickTimes.size >= 3) {
                 isHallonDialogOpen = true
                 clickTimes.clear()

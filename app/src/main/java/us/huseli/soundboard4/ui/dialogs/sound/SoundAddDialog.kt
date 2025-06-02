@@ -107,11 +107,11 @@ private fun SoundAddDialogImpl(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    pluralStringResource(
+                    if (uiState.totalSoundCount > 0) pluralStringResource(
                         R.plurals.x_sounds_found,
                         uiState.totalSoundCount,
                         uiState.totalSoundCount,
-                    )
+                    ) else stringResource(R.string.no_sounds_were_found)
                 )
 
                 if (uiState.errors.isNotEmpty()) {
@@ -123,15 +123,13 @@ private fun SoundAddDialogImpl(
                     }
                 }
 
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.category))
-                    CategoryDropdownMenu(
-                        categories = uiState.categories,
-                        selectedCategoryId = categoryId,
-                        onSelect = { onCategorySelect(it?.id) },
-                        onAddCategoryClick = onAddCategoryClick,
-                    )
-                }
+                CategoryDropdownMenu(
+                    categories = uiState.categories,
+                    selectedCategoryId = categoryId,
+                    onSelect = { onCategorySelect(it?.id) },
+                    onAddCategoryClick = onAddCategoryClick,
+                    label = { Text(stringResource(R.string.category)) },
+                )
 
                 singleSoundName?.also { name ->
                     OutlinedTextField(

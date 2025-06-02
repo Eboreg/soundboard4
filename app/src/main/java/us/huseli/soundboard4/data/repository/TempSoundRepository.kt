@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import us.huseli.soundboard4.R
 import us.huseli.soundboard4.data.database.model.Sound
 import us.huseli.soundboard4.data.model.TempSound
+import us.huseli.soundboard4.getAnnotatedString
 import us.huseli.soundboard4.getInternalSoundDirectory
 import us.huseli.soundboard4.ui.utils.WorkInProgressState
 import java.io.File
@@ -34,7 +35,7 @@ class TempSoundRepository @Inject constructor(@ApplicationContext private val co
         return tempSounds.map { tempSound ->
             val outFile = File(context.getInternalSoundDirectory(), tempSound.file.name)
 
-            wipState?.addStatusRow(context.getString(R.string.saving_x, tempSound.name))
+            wipState?.addStatusRow(context.getAnnotatedString(R.string.saving_x, tempSound.name))
             tempSound.file.renameTo(outFile)
             Sound(
                 id = tempSound.id,

@@ -7,6 +7,7 @@ import us.huseli.soundboard4.R
 import us.huseli.soundboard4.data.repository.SettingsRepository
 import us.huseli.soundboard4.data.repository.SoundRepository
 import us.huseli.soundboard4.data.repository.TempSoundRepository
+import us.huseli.soundboard4.getAnnotatedString
 import us.huseli.soundboard4.ui.utils.WorkInProgressState
 import javax.inject.Inject
 
@@ -23,7 +24,7 @@ class ManualSoundImportUseCase @Inject constructor(
 
         for (uri in uris) {
             uri.path?.substringAfterLast('/')?.also {
-                wipState?.addStatusRow(context.getString(R.string.importing_x, it))
+                wipState?.addStatusRow(context.getAnnotatedString(R.string.importing_x, it))
             }
             try {
                 tempSoundRepository.tempSounds.value += uriToTempSound(uri, existingChecksums)

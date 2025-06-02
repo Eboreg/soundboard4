@@ -16,6 +16,7 @@ import us.huseli.soundboard4.data.repository.CategoryRepository
 import us.huseli.soundboard4.data.repository.SettingsRepository
 import us.huseli.soundboard4.data.repository.SoundRepository
 import us.huseli.soundboard4.domain.AutoSoundImportUseCase
+import us.huseli.soundboard4.getAnnotatedString
 import us.huseli.soundboard4.getInternalSoundDirectory
 import us.huseli.soundboard4.isWavMimeType
 import us.huseli.soundboard4.ui.states.SettingsUiState
@@ -67,7 +68,7 @@ class SettingsViewModel @Inject constructor(
             val outFile = File(context.getInternalSoundDirectory(), "$stem.wav")
             val session = FFmpegKit.execute("-i \"${sound.file.path}\" -y \"${outFile.path}\"")
 
-            wipState?.addStatusRow(context.getString(R.string.converting_x, sound.name))
+            wipState?.addStatusRow(context.getAnnotatedString(R.string.converting_x, sound.name))
 
             if (session.returnCode.isValueSuccess) {
                 sound.file.delete()
@@ -98,6 +99,8 @@ class SettingsViewModel @Inject constructor(
             )
         )
     }
+
+    suspend fun resetAllPlayCounts() = soundRepository.resetAllPlayCounts()
 
     fun setAutoImport(value: Boolean) = settingsRepository.setAutoImport(value)
 

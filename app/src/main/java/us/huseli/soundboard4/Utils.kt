@@ -1,11 +1,18 @@
 package us.huseli.soundboard4
 
 import android.content.Context
+import androidx.annotation.PluralsRes
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.fromHtml
 import us.huseli.soundboard4.Constants.SOUND_DIRNAME
 import java.io.File
 import java.io.InputStream
@@ -78,3 +85,16 @@ fun Duration.toShortString(): String = when {
 }
 
 fun String.isWavMimeType() = listOf("audio/wav", "audio/wave", "audio/x-wav", "audio/vnd.wave").contains(this)
+
+@Composable
+@ReadOnlyComposable
+fun annotatedStringResource(@StringRes id: Int, vararg formatArgs: Any): AnnotatedString =
+    AnnotatedString.fromHtml(stringResource(id, *formatArgs))
+
+@Composable
+@ReadOnlyComposable
+fun annotatedPluralStringResource(@PluralsRes id: Int, count: Int, vararg formatArgs: Any): AnnotatedString =
+    AnnotatedString.fromHtml(pluralStringResource(id, count, *formatArgs))
+
+fun Context.getAnnotatedString(@StringRes id: Int, vararg formatArgs: Any): AnnotatedString =
+    AnnotatedString.fromHtml(getString(id, *formatArgs))

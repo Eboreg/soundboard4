@@ -44,6 +44,7 @@ import kotlinx.coroutines.launch
 import us.huseli.soundboard4.R
 import us.huseli.soundboard4.SoundSortingKey
 import us.huseli.soundboard4.data.database.model.Category
+import us.huseli.soundboard4.getAnnotatedString
 import us.huseli.soundboard4.ui.dialogs.ColorPickerDialog
 import us.huseli.soundboard4.ui.theme.Soundboard4Theme
 import us.huseli.soundboard4.ui.utils.SimpleExposedDropdownMenu
@@ -68,7 +69,7 @@ fun CategoryEditDialog(
         onDismiss = onDismiss,
         onSave = { category ->
             scope.launch {
-                wipState.run(Dispatchers.IO, context.getString(R.string.saving_x, category.name)) {
+                wipState.run(Dispatchers.IO, context.getAnnotatedString(R.string.saving_x, category.name)) {
                     viewModel.save(category)
                 }
                 if (isNew) onCreated(category)
@@ -148,15 +149,16 @@ private fun CategoryEditDialogImpl(
                     OutlinedButton(
                         onClick = { isColorPickerOpen = true },
                         shape = MaterialTheme.shapes.extraSmall,
+                        modifier = Modifier.weight(1f)
                     ) { Text(stringResource(R.string.select_background_colour)) }
                 }
 
                 Column {
-                    Text(stringResource(R.string.sort_sounds_by))
                     SimpleExposedDropdownMenu(
                         values = SoundSortingKey.entries,
                         initialValue = sortingKey,
                         onSelect = { sortingKey = it!! },
+                        label = { Text(stringResource(R.string.sort_sounds_by)) },
                         item = { Text(stringResource(it!!.resId)) },
                     )
                     Row(

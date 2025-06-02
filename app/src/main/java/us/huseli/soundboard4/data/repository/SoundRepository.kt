@@ -45,6 +45,8 @@ class SoundRepository @Inject constructor(private val soundDao: SoundDao) {
 
     suspend fun listAll(): List<Sound> = soundDao.listAll()
 
+    suspend fun resetAllPlayCounts() = soundDao.resetAllPlayCounts()
+
     suspend fun selectAllVisibleSounds() {
         _selectedSoundIds.value = soundDao.listAll().filterBySearchTerm(_searchTerm.value).map { it.id }.toSet()
     }

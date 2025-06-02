@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 import us.huseli.soundboard4.ui.App
+import us.huseli.soundboard4.ui.theme.Soundboard4Theme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -15,6 +16,10 @@ class MainActivity : ComponentActivity() {
 
         installSplashScreen()
         enableEdgeToEdge()
-        setContent { App() }
+        setContent {
+            Soundboard4Theme {
+                App()
+            }
+        }
     }
 }

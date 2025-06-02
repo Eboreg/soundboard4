@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,18 +40,18 @@ import kotlin.coroutines.CoroutineContext
 class WorkInProgressState(activeWorkers: Int = 0) {
     private var activeWorkers by mutableIntStateOf(activeWorkers)
 
-    val statusRows = mutableStateListOf<String>()
+    val statusRows = mutableStateListOf<CharSequence>()
 
     val isActive: Boolean
         get() = activeWorkers > 0
 
-    fun addStatusRow(row: String) {
+    fun addStatusRow(row: CharSequence) {
         if (statusRows.firstOrNull() != row) {
             statusRows.add(0, row)
         }
     }
 
-    suspend fun <T> run(context: CoroutineContext? = null, statusRow: String? = null, block: suspend () -> T): T {
+    suspend fun <T> run(context: CoroutineContext? = null, statusRow: CharSequence? = null, block: suspend () -> T): T {
         onStart()
         statusRow?.also(this::addStatusRow)
         return try {
@@ -109,7 +110,10 @@ fun WorkInProgressOverlay(wipState: WorkInProgressState) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(10.dp))
                     for (statusRow in wipState.statusRows) {
-                        Text(statusRow, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
+                        if (statusRow is String)
+                            Text(statusRow, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
+                        else if (statusRow is AnnotatedString)
+                            Text(statusRow, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
                     }
                 }
             }

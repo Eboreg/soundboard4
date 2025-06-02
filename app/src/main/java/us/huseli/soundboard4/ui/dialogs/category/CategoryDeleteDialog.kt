@@ -8,15 +8,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import us.huseli.soundboard4.R
+import us.huseli.soundboard4.annotatedPluralStringResource
+import us.huseli.soundboard4.annotatedStringResource
 import us.huseli.soundboard4.data.database.model.Category
 import us.huseli.soundboard4.data.database.model.Sound
+import us.huseli.soundboard4.getAnnotatedString
 import us.huseli.soundboard4.ui.utils.WorkInProgressState
 import us.huseli.soundboard4.ui.utils.rememberWorkInProgressState
 
@@ -38,7 +40,10 @@ fun CategoryDeleteDialog(
             onDismiss = onDismiss,
             onConfirm = {
                 scope.launch {
-                    wipState.run(Dispatchers.IO, context.getString(R.string.deleting_x, it.name)) { viewModel.delete() }
+                    wipState.run(
+                        Dispatchers.IO,
+                        context.getAnnotatedString(R.string.deleting_x, it.name),
+                    ) { viewModel.delete() }
                     onDismiss()
                 }
             },
@@ -60,15 +65,14 @@ private fun CategoryDeleteDialogImpl(
         confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.delete)) } },
         title = { Text(stringResource(R.string.delete_category)) },
         text = {
-            Text(
-                if (sounds.isNotEmpty()) pluralStringResource(
+            if (sounds.isNotEmpty()) Text(
+                annotatedPluralStringResource(
                     R.plurals.do_you_want_to_delete_x_and_its_x_sounds,
                     sounds.size,
                     category.name,
                     sounds.size,
                 )
-                else stringResource(R.string.do_you_want_to_delete_x, category.name)
-            )
+            ) else Text(annotatedStringResource(R.string.do_you_want_to_delete_x, category.name))
         },
     )
 }

@@ -1,5 +1,6 @@
 package us.huseli.soundboard4.ui.topbar
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.sharp.Close
@@ -24,6 +25,13 @@ fun SoundFilterTextField(value: String, onValueChange: (String?) -> Unit, modifi
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val hide = {
+        onValueChange(null)
+        keyboardController?.hide()
+        focusManager.clearFocus()
+    }
+
+    BackHandler(onBack = hide)
 
     TextField(
         value = value,
@@ -38,11 +46,7 @@ fun SoundFilterTextField(value: String, onValueChange: (String?) -> Unit, modifi
             Icon(
                 imageVector = Icons.Sharp.Close,
                 contentDescription = stringResource(R.string.clear_search),
-                modifier = Modifier.clickable {
-                    onValueChange(null)
-                    keyboardController?.hide()
-                    focusManager.clearFocus()
-                },
+                modifier = Modifier.clickable(onClick = hide),
             )
         },
         modifier = modifier.focusRequester(focusRequester)

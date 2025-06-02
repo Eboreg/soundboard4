@@ -25,6 +25,9 @@ abstract class SoundDao : BaseDao<Sound> {
     @Query("SELECT * FROM sounds")
     abstract suspend fun listAll(): List<Sound>
 
+    @Query("UPDATE sounds SET playCount = 0")
+    abstract suspend fun resetAllPlayCounts()
+
     @Query("UPDATE sounds SET duration = :durationMs WHERE id = :id")
     abstract suspend fun updateDuration(id: String, durationMs: Long)
 }

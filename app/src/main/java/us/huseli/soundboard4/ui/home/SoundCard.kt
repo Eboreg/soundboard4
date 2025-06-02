@@ -1,7 +1,6 @@
 package us.huseli.soundboard4.ui.home
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -19,9 +18,7 @@ import androidx.compose.material.icons.sharp.PauseCircle
 import androidx.compose.material.icons.sharp.PlayCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,12 +26,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -50,7 +47,6 @@ import us.huseli.soundboard4.rememberContentColorFor
 import us.huseli.soundboard4.toShortString
 import us.huseli.soundboard4.ui.states.SoundCardUiState
 import us.huseli.soundboard4.ui.theme.Soundboard4Theme
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -61,8 +57,11 @@ fun SoundCard(
     onSelect: () -> Unit = {},
     onDeselect: () -> Unit = {},
     onSelectUntil: () -> Unit = {},
+    onEditClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
 ) {
     val context = LocalContext.current
+    var isContextMenuExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.player.playbackState, isScrollInProgress) {
         if (uiState.player.playbackState == SoundPlayer.PlaybackState.CREATED && !isScrollInProgress) {
@@ -79,9 +78,6 @@ fun SoundCard(
     SoundCardImpl(
         uiState = uiState,
         modifier = modifier,
-        progress = uiState.player.progress,
-        playbackState = uiState.player.playbackState,
-        duration = uiState.player.duration,
         onClick = {
             if (uiState.isSelectEnabled) {
                 if (uiState.isSelected) onDeselect()
@@ -98,17 +94,27 @@ fun SoundCard(
                 }
             }
         },
-        onLongClick = onSelectUntil,
+        onLongClick = {
+            if (uiState.isSelectEnabled) onSelectUntil()
+            else isContextMenuExpanded = true
+        },
     )
+
+    if (isContextMenuExpanded) {
+        SoundContextMenu(
+            uiState = uiState,
+            onDismiss = { isContextMenuExpanded = false },
+            onEditClick = onEditClick,
+            onDeleteClick = onDeleteClick,
+            onSelectClick = onSelect,
+        )
+    }
 }
 
 @Composable
 fun SoundCardImpl(
     uiState: SoundCardUiState,
     modifier: Modifier = Modifier,
-    progress: Float = 0f,
-    playbackState: SoundPlayer.PlaybackState = SoundPlayer.PlaybackState.STOPPED,
-    duration: Duration = uiState.duration,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
@@ -122,7 +128,12 @@ fun SoundCardImpl(
             .fillMaxWidth()
             .padding(bottom = 5.dp)
             .aspectRatio(4f / 3f)
-            .pointerInput(uiState.isSelectEnabled, uiState.repressMode, playbackState, uiState.isSelected) {
+            .pointerInput(
+                uiState.isSelectEnabled,
+                uiState.repressMode,
+                uiState.player.playbackState,
+                uiState.isSelected,
+            ) {
                 awaitEachGesture {
                     awaitFirstDown()
 
@@ -148,8 +159,8 @@ fun SoundCardImpl(
                         listOf(
                             SoundPlayer.PlaybackState.PLAYING,
                             SoundPlayer.PlaybackState.PAUSED,
-                        ).contains(playbackState)
-                    ) progress else uiState.volume
+                        ).contains(uiState.player.playbackState)
+                    ) uiState.player.progress else uiState.volume
                 },
                 modifier = Modifier.height(4.dp).fillMaxWidth().align(Alignment.BottomCenter),
                 trackColor = uiState.backgroundColor,
@@ -158,7 +169,7 @@ fun SoundCardImpl(
             )
 
             if (uiState.isSelected) SoundCardIcon(Icons.Sharp.Check, Color(0x60B2EBF2))
-            else when (playbackState) {
+            else when (uiState.player.playbackState) {
                 SoundPlayer.PlaybackState.ERROR -> SoundCardIcon(Icons.Sharp.Block)
                 SoundPlayer.PlaybackState.PAUSED -> SoundCardIcon(Icons.Sharp.PauseCircle)
                 SoundPlayer.PlaybackState.PLAYING -> SoundCardIcon(Icons.Sharp.PlayCircle)
@@ -187,7 +198,7 @@ fun SoundCardImpl(
                 shape = RoundedCornerShape(bottomStart = 4.dp),
             ) {
                 Text(
-                    text = duration.toShortString(),
+                    text = uiState.player.duration.toShortString(),
                     color = rememberContentColorFor(Color.DarkGray),
                     fontSize = uiState.durationFontSize,
                     lineHeight = uiState.durationFontSize,
@@ -211,18 +222,6 @@ fun SoundCardImpl(
     }
 }
 
-@Composable
-private fun SoundCardIcon(imageVector: ImageVector, backgroundColor: Color = Color.Transparent) {
-    Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
-        Icon(
-            imageVector = imageVector,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize().padding(5.dp),
-            tint = LocalContentColor.current.copy(alpha = 0.5f),
-        )
-    }
-}
-
 @Preview
 @Composable
 private fun SoundCardPreview() {
@@ -234,7 +233,6 @@ private fun SoundCardPreview() {
                 backgroundColor = Color.Red,
                 playCount = 10,
             ),
-            duration = 2.5.seconds,
         )
     }
 }

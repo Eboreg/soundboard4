@@ -31,6 +31,7 @@ fun CategoryDropdownMenu(
     emptyItemText: String = "-",
     onSelect: (Category?) -> Unit,
     onAddCategoryClick: () -> Unit,
+    label: (@Composable () -> Unit)? = null,
 ) {
     val initialValue = remember(selectedCategoryId, categories) { categories.find { it.id == selectedCategoryId } }
 
@@ -40,6 +41,7 @@ fun CategoryDropdownMenu(
     ) {
         SimpleExposedDropdownMenu(
             values = categories,
+            label = label,
             initialValue = initialValue,
             onSelect = onSelect,
             showEmptyItem = showEmptyItem,

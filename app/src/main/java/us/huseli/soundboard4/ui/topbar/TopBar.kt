@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import us.huseli.soundboard4.R
 import us.huseli.soundboard4.RepressMode
+import us.huseli.soundboard4.ui.states.TopBarUiState
 import us.huseli.soundboard4.ui.utils.SimpleDropdownMenu
 
 enum class TopBarDropdownMenuItem(val text: Int, val icon: ImageVector) {
@@ -45,11 +46,7 @@ enum class TopBarDropdownMenuItem(val text: Int, val icon: ImageVector) {
 @Composable
 fun TopBar(
     modifier: Modifier = Modifier,
-    repressMode: RepressMode = RepressMode.STOP,
-    canZoomIn: Boolean = true,
-    searchTerm: String? = null,
-    canUndo: Boolean = false,
-    canRedo: Boolean = false,
+    uiState: TopBarUiState = TopBarUiState(),
     onRepressModeChange: (RepressMode) -> Unit = {},
     onAddCategoryClick: () -> Unit = {},
     onAddSoundsClick: () -> Unit = {},
@@ -67,14 +64,14 @@ fun TopBar(
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.padding(horizontal = 10.dp).fillMaxWidth()
             ) {
-                TopBarLogo(modifier = Modifier.padding(horizontal = 4.dp, vertical = 10.dp))
+                TopBarLogo(modifier = Modifier.padding(vertical = 10.dp).padding(end = 10.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (searchTerm != null) {
+                    if (uiState.searchTerm != null) {
                         SoundFilterTextField(
-                            value = searchTerm,
+                            value = uiState.searchTerm,
                             onValueChange = onSearchTermChange,
                             modifier = Modifier.weight(1f),
                         )
@@ -85,7 +82,7 @@ fun TopBar(
                         IconButton(onClick = onStopAllPlaybackClick) {
                             Icon(Icons.Sharp.Block, stringResource(R.string.stop_all_playback))
                         }
-                        RepressModeMenu(repressMode, onRepressModeChange)
+                        RepressModeMenu(uiState.repressMode, onRepressModeChange)
                     }
 
                     SimpleDropdownMenu(
@@ -108,9 +105,9 @@ fun TopBar(
                         },
                         isItemEnabled = { item ->
                             when (item) {
-                                TopBarDropdownMenuItem.ZoomIn -> canZoomIn
-                                TopBarDropdownMenuItem.Undo -> canUndo
-                                TopBarDropdownMenuItem.Redo -> canRedo
+                                TopBarDropdownMenuItem.ZoomIn -> uiState.canZoomIn
+                                TopBarDropdownMenuItem.Undo -> uiState.canUndo
+                                TopBarDropdownMenuItem.Redo -> uiState.canRedo
                                 else -> true
                             }
                         },

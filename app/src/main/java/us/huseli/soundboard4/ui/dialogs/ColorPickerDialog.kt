@@ -1,13 +1,19 @@
 package us.huseli.soundboard4.ui.dialogs
 
+import android.content.res.Configuration
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.sharp.Casino
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,7 +33,9 @@ import com.github.skydoves.colorpicker.compose.AlphaTile
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import us.huseli.retaintheme.extensions.random
 import us.huseli.soundboard4.R
+import us.huseli.soundboard4.ui.theme.Soundboard4Theme
 
 @Composable
 fun ColorPickerDialog(
@@ -42,8 +50,17 @@ fun ColorPickerDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = MaterialTheme.shapes.small,
-        confirmButton = { TextButton(onClick = { onConfirm(color) }) { Text(stringResource(R.string.ok)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        confirmButton = {
+            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                IconButton(onClick = { controller.selectByColor(Color.random(), true) }) {
+                    Icon(Icons.Sharp.Casino, stringResource(R.string.random_colour))
+                }
+                Row {
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+                    TextButton(onClick = { onConfirm(color) }) { Text(stringResource(R.string.ok)) }
+                }
+            }
+        },
         title = title,
         text = {
             Column(
@@ -74,8 +91,10 @@ fun ColorPickerDialog(
     )
 }
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 private fun ColorPickerDialogPreview() {
-    ColorPickerDialog()
+    Soundboard4Theme {
+        ColorPickerDialog()
+    }
 }

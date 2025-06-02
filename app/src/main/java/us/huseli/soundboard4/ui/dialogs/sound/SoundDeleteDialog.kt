@@ -1,5 +1,6 @@
 package us.huseli.soundboard4.ui.dialogs.sound
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import us.huseli.soundboard4.R
+import us.huseli.soundboard4.annotatedStringResource
 import us.huseli.soundboard4.ui.utils.WorkInProgressState
 import us.huseli.soundboard4.ui.utils.rememberWorkInProgressState
 
@@ -25,11 +27,13 @@ fun SoundDeleteDialog(
     onDismiss: () -> Unit
 ) {
     val soundCount by viewModel.soundCount.collectAsStateWithLifecycle()
+    val name by viewModel.name.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     SoundDeleteDialogImpl(
         soundCount = soundCount,
+        name = name,
         onDismiss = onDismiss,
         onConfirm = {
             scope.launch {
@@ -46,6 +50,7 @@ fun SoundDeleteDialog(
 @Composable
 private fun SoundDeleteDialogImpl(
     soundCount: Int,
+    name: String? = null,
     onDismiss: () -> Unit = {},
     onConfirm: () -> Unit = {},
 ) {
@@ -56,7 +61,19 @@ private fun SoundDeleteDialogImpl(
         shape = MaterialTheme.shapes.small,
         title = { Text(pluralStringResource(R.plurals.delete_sound, soundCount)) },
         text = {
-            Text(pluralStringResource(R.plurals.do_you_want_to_delete_the_selected_x_sounds, soundCount, soundCount))
+            Column {
+                if (name != null) {
+                    Text(annotatedStringResource(R.string.do_you_want_to_delete_x, name))
+                } else {
+                    Text(
+                        pluralStringResource(
+                            R.plurals.do_you_want_to_delete_the_selected_x_sounds,
+                            soundCount,
+                            soundCount,
+                        )
+                    )
+                }
+            }
         },
     )
 }

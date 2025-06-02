@@ -1,5 +1,7 @@
 package us.huseli.soundboard4.ui.home
 
+import android.content.Context
+import android.net.Uri
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
@@ -8,34 +10,62 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import us.huseli.retaintheme.extensions.launchOnIOThread
 import us.huseli.retaintheme.extensions.listItemsBetween
+import us.huseli.retaintheme.snackbar.SnackbarEngine
 import us.huseli.retaintheme.utils.AbstractBaseViewModel
 import us.huseli.soundboard4.Constants.SOUND_DURATION_FONT_SIZE
 import us.huseli.soundboard4.Constants.SOUND_DURATION_FONT_SIZE_LARGE
 import us.huseli.soundboard4.Constants.SOUND_NAME_FONT_SIZE
 import us.huseli.soundboard4.Constants.SOUND_NAME_FONT_SIZE_LARGE
+import us.huseli.soundboard4.R
+import us.huseli.soundboard4.RepressMode
 import us.huseli.soundboard4.data.database.model.SoundComparator
 import us.huseli.soundboard4.data.database.model.filterBySearchTerm
 import us.huseli.soundboard4.data.repository.CategoryRepository
 import us.huseli.soundboard4.data.repository.SettingsRepository
 import us.huseli.soundboard4.data.repository.SoundRepository
 import us.huseli.soundboard4.data.repository.UndoRepository
+import us.huseli.soundboard4.domain.ManualSoundImportUseCase
 import us.huseli.soundboard4.player.SoundPlayerRepository
 import us.huseli.soundboard4.ui.states.CategoryUiState
 import us.huseli.soundboard4.ui.states.HomeUiState
 import us.huseli.soundboard4.ui.states.SoundCardUiState
+import us.huseli.soundboard4.ui.states.TopBarUiState
+import us.huseli.soundboard4.ui.utils.WorkInProgressState
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    settingsRepository: SettingsRepository,
+    private val settingsRepository: SettingsRepository,
     private val soundRepository: SoundRepository,
     private val categoryRepository: CategoryRepository,
     private val soundPlayerRepository: SoundPlayerRepository,
     private val undoRepository: UndoRepository,
+    private val manualSoundImportUseCase: ManualSoundImportUseCase,
 ) : AbstractBaseViewModel() {
+    val isSelectEnabled = soundRepository.selectedSounds.map { it.isNotEmpty() }.stateWhileSubscribed(false)
+    val selectedSoundCount = soundRepository.selectedSounds.map { it.size }.stateWhileSubscribed(0)
+    val totalSoundCount = soundRepository.filteredSounds.map { it.size }.stateWhileSubscribed(0)
+
+    val topBarUiState = combine(
+        settingsRepository.repressMode,
+        settingsRepository.canZoomIn,
+        soundRepository.searchTerm,
+        undoRepository.canUndo,
+        undoRepository.canRedo,
+    ) { repressMode, canZoomIn, searchTerm, canUndo, canRedo ->
+        TopBarUiState(
+            repressMode = repressMode,
+            canZoomIn = canZoomIn,
+            searchTerm = searchTerm,
+            canUndo = canUndo,
+            canRedo = canRedo,
+        )
+    }.stateWhileSubscribed(TopBarUiState())
+
     val homeUiState = combine(
         categoryRepository.flowAllMultimaps(),
         settingsRepository.repressMode,
@@ -82,7 +112,12 @@ class HomeViewModel @Inject constructor(
         )
     }.flowOn(Dispatchers.IO).stateWhileSubscribed(HomeUiState())
 
+    fun deselectAllSounds() = soundRepository.deselectAllSounds()
+
     fun deselectSound(soundId: String) = soundRepository.deselectSound(soundId)
+
+    suspend fun importSoundsFromUris(uris: List<Uri>, wipState: WorkInProgressState? = null): Boolean =
+        manualSoundImportUseCase(uris, wipState)
 
     fun moveCategoryDown(categoryId: String) {
         launchOnIOThread {
@@ -95,6 +130,14 @@ class HomeViewModel @Inject constructor(
         launchOnIOThread {
             categoryRepository.moveUp(categoryId)
             undoRepository.pushUndoState()
+        }
+    }
+
+    fun redo() = undoRepository.redo()
+
+    fun selectAllSounds() {
+        viewModelScope.launch {
+            soundRepository.selectAllVisibleSounds()
         }
     }
 
@@ -119,6 +162,26 @@ class HomeViewModel @Inject constructor(
     fun setCategoryCollapsed(categoryId: String, collapsed: Boolean) {
         launchOnIOThread {
             categoryRepository.setCollapsed(categoryId, collapsed)
+        }
+    }
+
+    fun setRepressMode(value: RepressMode) = settingsRepository.setRepressMode(value)
+
+    fun setSearchTerm(value: String?) = soundRepository.setSearchTerm(value)
+
+    fun stopAllPlayers() = soundPlayerRepository.stopAllPlayers()
+
+    fun undo() = undoRepository.undo()
+
+    fun zoomIn(context: Context) {
+        settingsRepository.zoomIn().also {
+            SnackbarEngine.addInfo(context.getString(R.string.zoom_x_percent, it))
+        }
+    }
+
+    fun zoomOut(context: Context) {
+        settingsRepository.zoomOut().also {
+            SnackbarEngine.addInfo(context.getString(R.string.zoom_x_percent, it))
         }
     }
 }

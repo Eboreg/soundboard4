@@ -83,7 +83,7 @@ private fun SoundEditDialogImpl(
     var keepVolume by rememberSaveable(singleSound) { mutableStateOf(singleSound == null) }
     var resetPlayCount by rememberSaveable { mutableStateOf(false) }
     var categoryId by rememberSaveable(singleSound) { mutableStateOf(selectedCategoryId ?: singleSound?.categoryId) }
-    val params = remember(name, volume, keepVolume, categoryId) {
+    val params = remember(name, volume, keepVolume, categoryId, resetPlayCount) {
         SoundEditParams(
             name = name,
             volume = volume.takeIf { !keepVolume },
@@ -126,17 +126,15 @@ private fun SoundEditDialogImpl(
                         }
                     }
                 }
-                Column {
-                    Text(stringResource(R.string.category))
-                    CategoryDropdownMenu(
-                        categories = categories,
-                        selectedCategoryId = categoryId,
-                        onSelect = { categoryId = it?.id },
-                        showEmptyItem = singleSound == null,
-                        emptyItemText = stringResource(R.string.not_changed),
-                        onAddCategoryClick = onAddCategoryClick,
-                    )
-                }
+                CategoryDropdownMenu(
+                    categories = categories,
+                    selectedCategoryId = categoryId,
+                    onSelect = { categoryId = it?.id },
+                    showEmptyItem = singleSound == null,
+                    emptyItemText = stringResource(R.string.not_changed),
+                    onAddCategoryClick = onAddCategoryClick,
+                    label = { Text(stringResource(R.string.category)) },
+                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
