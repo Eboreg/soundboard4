@@ -1,7 +1,7 @@
 import java.io.FileInputStream
 import java.util.Properties
 
-val currentVersionCode = 1
+val currentVersionCode = 2
 val currentVersionName = "0.1.1"
 val keystoreProperties = Properties()
 
