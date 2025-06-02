@@ -5,7 +5,14 @@ val currentVersionCode = 1
 val currentVersionName = "0.1.0"
 val keystoreProperties = Properties()
 
-keystoreProperties.load(FileInputStream(rootProject.file("keystore.properties")))
+try {
+    keystoreProperties.load(FileInputStream(rootProject.file("keystore.properties")))
+} catch (_: Throwable) {
+    keystoreProperties["storeFile"] = "/dev/null"
+    keystoreProperties["storePassword"] = ""
+    keystoreProperties["keyAlias"] = ""
+    keystoreProperties["keyPassword"] = ""
+}
 
 plugins {
     alias(libs.plugins.android.application)
