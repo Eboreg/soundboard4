@@ -8,6 +8,7 @@ object Constants {
     const val PREF_AUTO_IMPORT_DIRECTORY = "autoImportDirectory"
     const val PREF_COLUMN_COUNT_PORTRAIT = "columnCountPortrait"
     const val PREF_CONVERT_TO_WAV = "convertToWav"
+    const val PREF_IS_FIRST_RUN = "isFirstRun"
     const val PREF_REPRESS_MODE = "repressMode"
     const val SOUND_DIRNAME = "sounds"
     const val SOUND_DURATION_FONT_SIZE = 10

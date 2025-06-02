@@ -20,6 +20,7 @@ import us.huseli.soundboard4.Constants.PREF_AUTO_IMPORT_DIRECTORY
 import us.huseli.soundboard4.Constants.PREF_COLUMN_COUNT_PORTRAIT
 import us.huseli.soundboard4.Constants.PREF_CONVERT_TO_WAV
 import us.huseli.soundboard4.Constants.PREF_REPRESS_MODE
+import us.huseli.soundboard4.Constants.PREF_IS_FIRST_RUN
 import us.huseli.soundboard4.RepressMode
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,6 +50,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
     )
     private val _autoImportCategoryId = MutableStateFlow(preferences.getString(PREF_AUTO_IMPORT_CATEGORY_ID, null))
     private val _convertToWav = MutableStateFlow(preferences.getBoolean(PREF_CONVERT_TO_WAV, true))
+    private val _isFirstRun = MutableStateFlow(preferences.getBoolean(PREF_IS_FIRST_RUN, true))
 
     val autoImport = _autoImport.asStateFlow()
     val autoImportDirectory = _autoImportDirectory.asStateFlow()
@@ -71,6 +73,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         ColumnInfo(count = columnCount, widthDp = columnWidth)
     }
     val canZoomIn = columnInfo.map { it.count > 1 }
+    val isFirstRun = _isFirstRun.asStateFlow()
 
     init {
         preferences.registerOnSharedPreferenceChangeListener(this)
@@ -96,6 +99,8 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
     fun setScreenWidthDp(value: Int) {
         _screenWidthDp.value = value
     }
+
+    fun setIsFirstRun(value: Boolean) = preferences.edit { putBoolean(PREF_IS_FIRST_RUN, value) }
 
     fun zoomIn(): Int = zoom(-1)
 
@@ -147,6 +152,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             PREF_AUTO_IMPORT_DIRECTORY -> _autoImportDirectory.value = preferences.getString(key, null)?.toUri()
             PREF_AUTO_IMPORT_CATEGORY_ID -> _autoImportCategoryId.value = preferences.getString(key, null)
             PREF_CONVERT_TO_WAV -> _convertToWav.value = preferences.getBoolean(key, true)
+            PREF_IS_FIRST_RUN -> _isFirstRun.value = preferences.getBoolean(key, true)
         }
     }
 }

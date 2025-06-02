@@ -16,4 +16,4 @@ data class Category(
     val position: Int = 0,
     val sortingKey: SoundSortingKey = SoundSortingKey.NAME,
     val sortAscending: Boolean = true,
-) : IModel<Category>
+) : IModel

@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import kotlinx.serialization.Serializable
+import us.huseli.soundboard4.ui.dialogs.WelcomeDialog
 import us.huseli.soundboard4.ui.dialogs.category.CategoryDeleteDialog
 import us.huseli.soundboard4.ui.dialogs.category.CategoryEditDialog
 import us.huseli.soundboard4.ui.dialogs.sound.SoundAddDialog
@@ -52,6 +53,7 @@ fun App(viewModel: AppViewModel = hiltViewModel()) {
     val configuration = LocalConfiguration.current
     val wipState = rememberWorkInProgressState()
     val navController = rememberNavController()
+    val isFirstRun by viewModel.isFirstRun.collectAsStateWithLifecycle()
 
     LaunchedEffect(configuration.orientation) { viewModel.setOrientation(configuration.orientation) }
     LaunchedEffect(configuration.screenWidthDp) { viewModel.setScreenWidthDp(configuration.screenWidthDp) }
@@ -118,7 +120,9 @@ fun App(viewModel: AppViewModel = hiltViewModel()) {
         }
     }
 
-    WorkInProgressOverlay(wipState)
+    if (wipState.isActive) WorkInProgressOverlay(wipState)
+
+    if (isFirstRun) WelcomeDialog(onDismiss = { viewModel.setIsFirstRun(false) })
 }
 
 @Composable

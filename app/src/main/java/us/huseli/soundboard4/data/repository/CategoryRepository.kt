@@ -1,9 +1,9 @@
 package us.huseli.soundboard4.data.repository
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
+import us.huseli.soundboard4.R
 import us.huseli.soundboard4.data.database.dao.CategoryDao
 import us.huseli.soundboard4.data.database.model.Category
 import us.huseli.soundboard4.data.database.model.Sound
@@ -12,14 +12,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CategoryRepository @Inject constructor(private val categoryDao: CategoryDao, coroutineScope: CoroutineScope) {
-    init {
-        coroutineScope.launch(Dispatchers.IO) {
-            val categories = categoryDao.listAll()
-            if (categories.isEmpty()) categoryDao.insert(Category(name = "Default", backgroundColor = randomColor()))
-        }
-    }
-
+class CategoryRepository @Inject constructor(
+    private val categoryDao: CategoryDao,
+    @ApplicationContext private val context: Context,
+) {
     suspend fun delete(category: Category) = categoryDao.delete(category)
 
     fun flowAll(): Flow<List<Category>> = categoryDao.flowAll()
@@ -31,6 +27,12 @@ class CategoryRepository @Inject constructor(private val categoryDao: CategoryDa
     suspend fun insert(category: Category): Long {
         val position = categoryDao.getHighestPosition()?.plus(1) ?: 0
         return categoryDao.insert(category.copy(position = position))
+    }
+
+    suspend fun insertDefault() {
+        if (categoryDao.listAll().isEmpty()) {
+            categoryDao.insert(Category(name = context.getString(R.string.default_), backgroundColor = randomColor()))
+        }
     }
 
     suspend fun listAll(): List<Category> = categoryDao.listAll()

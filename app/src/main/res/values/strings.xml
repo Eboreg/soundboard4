@@ -17,6 +17,7 @@
     <string name="convert_sounds_to_wav_good_for_latency">Convert sounds to WAV (good for latency)</string>
     <string name="converting_x"><![CDATA[Converting <b>%1$s</b>]]></string>
     <string name="creation_time">Creation time</string>
+    <string name="default_">Default</string>
     <string name="delete">Delete</string>
     <string name="delete_category">Delete category</string>
     <string name="deleting_x"><![CDATA[Deleting <b>%1$s</b>]]></string>
@@ -69,6 +70,9 @@
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
     <string name="zoom_x_percent">Zoom: %1$d %%</string>
+    <string name="welcome_1">Hi. This is a custom soundboard, meaning you need to add the sounds yourself.</string>
+    <string name="welcome_2">The sounds will be copied to the app\'s internal storage. By default, they will also be converted to WAV format for the sake of low latency. You can disable this in the settings.</string>
+    <string name="welcome_3">This is free and open source software, and does not spy on you in any way.</string>
     <plurals name="add_anyway_question">
         <item quantity="one">Do you want to add it anyway?</item>
         <item quantity="other">Do you want to add them anyway?</item>

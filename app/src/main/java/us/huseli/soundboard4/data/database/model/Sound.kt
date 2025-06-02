@@ -39,7 +39,7 @@ data class Sound(
     val created: Instant = Instant.now(),
     val playCount: Int = 0,
     val mimeType: String = "",
-) : IModel<Sound> {
+) : IModel {
     val file: File
         get() = uri.toUri().buildUpon().scheme("file").build().toFile()
 }

@@ -87,34 +87,32 @@ fun rememberWorkInProgressState(activeWorkers: Int = 0): WorkInProgressState {
 
 @Composable
 fun WorkInProgressOverlay(wipState: WorkInProgressState) {
-    if (wipState.isActive) {
-        Dialog(
-            onDismissRequest = {},
-            properties = DialogProperties(dismissOnBackPress = false, usePlatformDefaultWidth = false),
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(dismissOnBackPress = false, usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.3f))
+                .zIndex(100f)
         ) {
-            Box(
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(5.dp),
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.3f))
-                    .zIndex(100f)
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.75f)
+                    .padding(10.dp)
+                    .align(Alignment.BottomCenter)
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(5.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.75f)
-                        .padding(10.dp)
-                        .align(Alignment.BottomCenter)
-                ) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = Modifier.height(10.dp))
-                    for (statusRow in wipState.statusRows) {
-                        if (statusRow is String)
-                            Text(statusRow, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
-                        else if (statusRow is AnnotatedString)
-                            Text(statusRow, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
-                    }
+                CircularProgressIndicator()
+                Spacer(modifier = Modifier.height(10.dp))
+                for (statusRow in wipState.statusRows) {
+                    if (statusRow is String)
+                        Text(statusRow, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
+                    else if (statusRow is AnnotatedString)
+                        Text(statusRow, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
                 }
             }
         }
