@@ -1,6 +1,6 @@
 # Ljudbräda
 
-It's a custom soundboard. Here, have some screenshots:
+It's a custom soundboard for Android. Releases are available [here](https://github.com/Eboreg/soundboard4/releases). Here, have some screenshots:
 
 ![](screenshots/Screenshot_20250602_174812.png)
 ![](screenshots/Screenshot_20250602_175137.png)
