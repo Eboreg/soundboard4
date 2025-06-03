@@ -1,8 +1,6 @@
 import java.io.FileInputStream
 import java.util.Properties
 
-val currentVersionCode = 2
-val currentVersionName = "0.1.1"
 val keystoreProperties = Properties()
 
 try {
@@ -27,6 +25,14 @@ android {
     namespace = "us.huseli.soundboard4"
     compileSdk = 35
 
+    defaultConfig {
+        applicationId = "us.huseli.soundboard4"
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 3
+        versionName = "0.1.2"
+    }
+
     signingConfigs {
         create("release") {
             storeFile = file(keystoreProperties["storeFile"] as String)
@@ -34,15 +40,6 @@ android {
             keyAlias = keystoreProperties["keyAlias"] as String
             keyPassword = keystoreProperties["keyPassword"] as String
         }
-    }
-
-    defaultConfig {
-        applicationId = "us.huseli.soundboard4"
-        minSdk = 26
-        targetSdk = 35
-        versionCode = currentVersionCode
-        versionName = currentVersionName
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
